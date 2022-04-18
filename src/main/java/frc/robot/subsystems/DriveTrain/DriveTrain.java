@@ -46,8 +46,10 @@ public class DriveTrain extends SubsystemBase{
   private SwerveDriveKinematics m_kinematics;
 
   double wkP, wkI, wkD;
+//
 
-
+  //initializes the drive train
+  
   public static DriveTrain getInstance(){
     if (m_instance == null){
       m_instance = new DriveTrain();
