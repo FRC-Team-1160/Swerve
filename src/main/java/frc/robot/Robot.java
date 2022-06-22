@@ -42,7 +42,22 @@ public class Robot extends TimedRobot {
    * SmartDashboard integrated updating.
    */
   @Override
-  public void robotPeriodic() {}
+  public void robotPeriodic() {
+    Joystick m_mainStick = new Joystick(OIConstants.mainStickPort);
+    while (true) {
+      double xAngle = (m_mainStick.getRawAxis(0)-0.5)*2;
+      double yAngle = (m_mainStick.getRawAxis(1)-0.5)*2;
+      double angle = Math.toDegrees(Math.atan(yAngle/xAngle)) + 90;
+      double mag = Math.sqrt(xAngle*xAngle + yAngle*yAngle);
+      System.out.print("Angle: ");
+      System.out.println(angle);
+      System.out.print("Magnitude: ");
+      System.out.println(mag);
+      if (m_mainStick.getRawButtonPressed(7)) {
+        break;
+      }
+    }
+  }
 
   /**
    * This autonomous (along with the chooser code above) shows how to select between different

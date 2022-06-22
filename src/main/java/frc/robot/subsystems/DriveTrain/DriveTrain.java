@@ -17,15 +17,21 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SerialPort.Port;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.PortConstants;
+
 
 public class DriveTrain extends SubsystemBase{
   /** 
    * Creates a new DriveTrain.
    */
+
+  private Joystick m_mainStick = new Joystick(OIConstants.mainStickPort);
+  
   private static DriveTrain m_instance;
 
   private TalonFX m_frontLeftRotationMotor, m_frontRightRotationMotor, m_backLeftRotationMotor, m_backRightRotationMotor;
@@ -118,6 +124,13 @@ public class DriveTrain extends SubsystemBase{
   
   @Override
   public void periodic() {
-    
+    double xAngle = (m_mainStick.getRawAxis(0)-0.5)*2;
+    double yAngle = (m_mainStick.getRawAxis(1)-0.5)*2;
+    double angle = Math.toDegrees(Math.atan(yAngle/xAngle)) + 90;
+    double mag = Math.sqrt(xAngle*xAngle + yAngle*yAngle);
+    double turn = (m_mainStick.getRawAxis(1)-0.5)*2;
+    SmartDashboard.putNumber("Angle", angle);
+    SmartDashboard.putNumber("Mag", mag);
+    SmartDashboard.putNumber("Turn", turn);
   }
 }
