@@ -37,7 +37,7 @@ public class SwerveDrive extends CommandBase {
     if (mag > 1) {
       mag = 1;
     }
-    mag *= 0.3;
+    mag *= 0.5;
     double turn = m_mainStick.getRawAxis(4);
     //field oriented
     double gyroAngle = m_drive.getGyroAngle();

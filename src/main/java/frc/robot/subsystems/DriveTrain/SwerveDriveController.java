@@ -1,5 +1,7 @@
 package frc.robot.subsystems.DriveTrain;
 
+import org.ejml.dense.row.mult.SubmatrixOps_FDRM;
+
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.SwerveConstants;
 
@@ -43,7 +45,7 @@ public class SwerveDriveController {
     //TURN WITHOUT DRIVING
     public void turn(double speed) {
         //zero is facing forward
-        speed *= 0.3;
+        speed *= 0.5;
         frontLeftWheel.set(45.0, speed);
         frontRightWheel.set(135.0, speed);
         backLeftWheel.set(315.0, speed);
@@ -64,8 +66,7 @@ public class SwerveDriveController {
 
         //FRONT LEFT
         //directly at the front left wheel is 45 degrees
-        frontLeftWheel.set(convert(driveDirection + turnAngle), driveSpeed);
-        if (closestAngle(driveDirection, 45.0) <= 90) {
+        if (closestAngle(driveDirection, 315.0) <= 90) {
             //front
             //tilt to the right
             frontLeftWheel.set(driveDirection + turnAngle, driveSpeed);
@@ -76,7 +77,7 @@ public class SwerveDriveController {
         }
         //FRONT RIGHT
         //directly at the front right wheel is 315 degrees
-        if (closestAngle(driveDirection, 315.0) < 90) {
+        if (closestAngle(driveDirection, 45.0) < 90) {
             //front
             //tilt right
             frontRightWheel.set(driveDirection + turnAngle, driveSpeed);
@@ -88,7 +89,7 @@ public class SwerveDriveController {
 
         //BACK LEFT
         //directly at back left wheel is 135 degrees
-        if (closestAngle(driveDirection, 135.0) < 90) {
+        if (closestAngle(driveDirection, 225.0) < 90) {
             //front
             //tilt right
             backLeftWheel.set(driveDirection + turnAngle, driveSpeed);
@@ -100,7 +101,9 @@ public class SwerveDriveController {
 
         //BACK RIGHT
         //directly at back right wheel is 225 degrees
-        if (closestAngle(driveDirection, 225.0) <= 90) {
+        SmartDashboard.putNumber("BR closest angle", closestAngle(driveDirection, 135.0));
+        if (closestAngle(driveDirection, 135.0) <= 90) {
+
             //front
             //tilt right
             backRightWheel.set(driveDirection + turnAngle, driveSpeed);
@@ -113,24 +116,14 @@ public class SwerveDriveController {
 
     private static double closestAngle(double a, double b)
     {
-        // get direction
-        double dir = b % 360.0 - a % 360.0;
-
-        // convert from -360 to 360 to -180 to 180
-        if (Math.abs(dir) > 180.0)
-        {
-                dir = -(Math.signum(dir) * 360.0) + dir;
+        if (Math.abs(a - b) <= 180) {
+            return Math.abs(a-b);
+        } else {
+            if (a > b) {
+                return Math.abs((a-360)-b);
+            } else {
+                return Math.abs((a+360)-b);
+            }
         }
-        return dir;
-    }
-
-    private static double convert(double a) {
-        if (a > 360) {
-            return (a-360.0);
-        }
-        if (a < 0) {
-            return (a+360.0);
-        }
-        return a;
     }
 }
