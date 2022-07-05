@@ -7,8 +7,10 @@
 
 package frc.robot.subsystems.DriveTrain;
 
+import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.TalonFXSensorCollection;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
+import com.ctre.phoenix.sensors.CANCoder;
 import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -45,6 +47,8 @@ public class DriveTrain extends SubsystemBase{
   private SwerveDriveWheel m_frontLeftWheel, m_frontRightWheel, m_backLeftWheel, m_backRightWheel;
   
   public SwerveDriveController m_controller;
+
+  private CANCoder m_frontLeftCoder, m_frontRightCoder, m_backLeftCoder, m_backRightCoder;
 
   private AHRS m_gyro;
 
@@ -89,16 +93,32 @@ public class DriveTrain extends SubsystemBase{
     m_backLeftRotationEncoder = m_backLeftRotationMotor.getSensorCollection();
     m_backRightRotationEncoder = m_backRightRotationMotor.getSensorCollection();
 
+    //CAN coedrs
+    m_frontLeftCoder = new CANCoder(PortConstants.FRONT_LEFT_CODER_DRIVE);
+    m_frontRightCoder = new CANCoder(PortConstants.FRONT_RIGHT_CODER_DRIVE);
+    m_backLeftCoder = new CANCoder(PortConstants.BACK_LEFT_CODER_DRIVE);
+    m_backRightCoder = new CANCoder(PortConstants.BACK_RIGHT_CODER_DRIVE);
+
+    /*m_frontLeftDirectionEncoder.setIntegratedSensorPosition(0, 0);
+    m_frontRightDirectionEncoder.setIntegratedSensorPosition(0, 0);
+    m_backLeftDirectionEncoder.setIntegratedSensorPosition(0, 0);
+    m_backRightDirectionEncoder.setIntegratedSensorPosition(0, 0);
+
+    m_frontLeftRotationEncoder.setIntegratedSensorPosition(0, 0);
+    m_frontRightRotationEncoder.setIntegratedSensorPosition(0, 0);
+    m_backLeftRotationEncoder.setIntegratedSensorPosition(0, 0);
+    m_backRightRotationEncoder.setIntegratedSensorPosition(0, 0);*/
+
     //swerve wheel PID values
-    wkP = 0.0001;
-    wkI = 0;
+    wkP = 0.005;
+    wkI = 0.000001;
     wkD = 0;
 
     //swerve wheels (controls the rotation and direction motors)
-    m_frontLeftWheel = new SwerveDriveWheel(wkP, wkI, wkD, m_frontLeftRotationMotor, m_frontLeftRotationEncoder, m_frontLeftDirectionMotor, m_frontLeftDirectionEncoder);
-    m_frontRightWheel = new SwerveDriveWheel(wkP, wkI, wkD, m_frontRightRotationMotor, m_frontRightRotationEncoder, m_frontRightDirectionMotor, m_frontRightDirectionEncoder);
-    m_backLeftWheel = new SwerveDriveWheel(wkP, wkI, wkD, m_backLeftRotationMotor, m_backLeftRotationEncoder, m_backLeftDirectionMotor, m_backLeftDirectionEncoder);
-    m_backRightWheel = new SwerveDriveWheel(wkP, wkI, wkD, m_backRightRotationMotor, m_backRightRotationEncoder, m_backRightDirectionMotor, m_backRightDirectionEncoder);
+    m_frontLeftWheel = new SwerveDriveWheel(wkP, wkI, wkD, m_frontLeftRotationMotor, m_frontLeftCoder, m_frontLeftDirectionMotor, m_frontLeftDirectionEncoder);
+    m_frontRightWheel = new SwerveDriveWheel(wkP, wkI, wkD, m_frontRightRotationMotor, m_frontRightCoder, m_frontRightDirectionMotor, m_frontRightDirectionEncoder);
+    m_backLeftWheel = new SwerveDriveWheel(wkP, wkI, wkD, m_backLeftRotationMotor, m_backLeftCoder, m_backLeftDirectionMotor, m_backLeftDirectionEncoder);
+    m_backRightWheel = new SwerveDriveWheel(wkP, wkI, wkD, m_backRightRotationMotor, m_backRightCoder, m_backRightDirectionMotor, m_backRightDirectionEncoder);
 
     m_controller = new SwerveDriveController(m_frontLeftWheel, m_frontRightWheel, m_backLeftWheel, m_backRightWheel);
 
@@ -114,23 +134,41 @@ public class DriveTrain extends SubsystemBase{
       m_frontLeftLocation, m_frontRightLocation, m_backLeftLocation, m_backRightLocation
     );
 
-    
+    m_gyro.zeroYaw();
   }
 
   public double getGyroAngle() {
     return m_gyro.getYaw();
   }
 
+  public void turnBackRight(double speed) {
+    m_backRightRotationMotor.set(TalonFXControlMode.PercentOutput, speed);
+  }
+
   
   @Override
   public void periodic() {
-    double xAngle = (m_mainStick.getRawAxis(0)-0.5)*2;
-    double yAngle = (m_mainStick.getRawAxis(1)-0.5)*2;
-    double angle = Math.toDegrees(Math.atan(yAngle/xAngle)) + 90;
+    double xAngle = m_mainStick.getRawAxis(0);
+    double yAngle = m_mainStick.getRawAxis(1);
+    double angle = Math.toDegrees(Math.atan((yAngle/xAngle)/2)) + 90;
+    if (xAngle < 0) {
+      angle += 180;
+    }
     double mag = Math.sqrt(xAngle*xAngle + yAngle*yAngle);
-    double turn = (m_mainStick.getRawAxis(1)-0.5)*2;
+    if (mag > 1) {
+      mag = 1;
+    }
+    double turn = m_mainStick.getRawAxis(4);
+    SmartDashboard.putNumber("x", xAngle);
+    SmartDashboard.putNumber("y", yAngle);
     SmartDashboard.putNumber("Angle", angle);
     SmartDashboard.putNumber("Mag", mag);
     SmartDashboard.putNumber("Turn", turn);
+    SmartDashboard.putNumber("Gyro Yaw", getGyroAngle());
+
+    SmartDashboard.putNumber("FLCoder", m_frontLeftCoder.getAbsolutePosition());
+    SmartDashboard.putNumber("FRCoder", m_frontRightCoder.getAbsolutePosition());
+    SmartDashboard.putNumber("BLCoder", m_backLeftCoder.getAbsolutePosition());
+    SmartDashboard.putNumber("BRCoder", m_backRightCoder.getAbsolutePosition());
   }
 }

@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.SwerveDrive;
+import frc.robot.commands.TestRotator;
 import frc.robot.subsystems.DriveTrain.DriveTrain;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
@@ -65,7 +66,10 @@ public class RobotContainer {
      */
     
     private void configureButtonBindings() {
-
+      new JoystickButton(m_mainStick, Button.kA.value)
+        .whileHeld(
+          new TestRotator(m_driveTrain)
+        );
     }
 
     /**
@@ -75,8 +79,8 @@ public class RobotContainer {
      */
 
     
-    /*public Command getAutonomousCommand() {
-        return false;
-    }*/
+    public Command getAutonomousCommand() {
+        return null;
+    }
     
 }

@@ -1,5 +1,8 @@
 package frc.robot.subsystems.DriveTrain;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Constants.SwerveConstants;
+
 public class SwerveDriveController {
     SwerveDriveWheel frontLeftWheel;
     SwerveDriveWheel frontRightWheel;
@@ -17,7 +20,8 @@ public class SwerveDriveController {
 
     //chooses either turning in place or turning while driving
     public void setSwerveDrive(double driveDirection, double driveSpeed, double turnSpeed) {
-        if ((driveSpeed == 0.0) && (turnSpeed != 0.0)) {
+        //this.driveTurn(driveDirection, driveSpeed, turnSpeed);
+        if ((driveSpeed <= 0.01) && (turnSpeed != 0.0)) {
             //turns without driving if no drive speed
             this.turn(turnSpeed);
         } else {
@@ -25,35 +29,25 @@ public class SwerveDriveController {
             //or drives and turns at the same time if turnspeed is not 0
             this.driveTurn(driveDirection, driveSpeed, turnSpeed);
         }
-
     }
 
     //DRIVE WITHOUT TURNING
     //we don't really actually need this but its good to have
     public void drive(double direction, double speed) {
-        frontLeftWheel.setDirection(direction);
-        frontRightWheel.setDirection(direction);
-        backLeftWheel.setDirection(direction);
-        backRightWheel.setDirection(direction);
-
-        frontLeftWheel.setSpeed(speed);
-        frontRightWheel.setSpeed(speed);
-        backLeftWheel.setSpeed(speed);
-        backRightWheel.setSpeed(speed);
+        frontLeftWheel.set(direction, speed);
+        frontRightWheel.set(direction, speed);
+        backLeftWheel.set(direction, speed);
+        backRightWheel.set(direction, speed);
     }
 
     //TURN WITHOUT DRIVING
     public void turn(double speed) {
         //zero is facing forward
-        frontLeftWheel.setDirection(45.0);
-        frontRightWheel.setDirection(135.0);
-        backLeftWheel.setDirection(315.0);
-        backRightWheel.setDirection(225.0);
-
-        frontLeftWheel.setSpeed(speed);
-        frontRightWheel.setSpeed(speed);
-        backLeftWheel.setSpeed(speed);
-        backRightWheel.setSpeed(speed);
+        speed *= 0.3;
+        frontLeftWheel.set(45.0, speed);
+        frontRightWheel.set(135.0, speed);
+        backLeftWheel.set(315.0, speed);
+        backRightWheel.set(225.0, speed);
 
     }
 
@@ -61,6 +55,7 @@ public class SwerveDriveController {
     public void driveTurn(double driveDirection, double driveSpeed, double turnSpeed) {
         //turn Speed is value fron -1.0 to 1.0 with -1 being max left and 1 being max right
         double turnAngle = turnSpeed * 45.0;
+        SmartDashboard.putNumber("turn Angle", turnAngle);
 
         //determine if wheel is in front or in back
         //for example: if the direction was to the right and the robot was facing forward,
@@ -68,56 +63,52 @@ public class SwerveDriveController {
         //if driving direction is within 90 degrees of the direction of the wheel, wheel is in front
 
         //FRONT LEFT
-        //directly at the front left wheel is 315 degrees or -45 degrees
-        if (closestAngle(driveDirection, 315.0) <= 90) {
+        //directly at the front left wheel is 45 degrees
+        frontLeftWheel.set(convert(driveDirection + turnAngle), driveSpeed);
+        if (closestAngle(driveDirection, 45.0) <= 90) {
             //front
             //tilt to the right
-            frontLeftWheel.setDirection(driveDirection + turnAngle);
+            frontLeftWheel.set(driveDirection + turnAngle, driveSpeed);
         } else {
             //back
             //tilt to the left
-            frontLeftWheel.setDirection(driveDirection - turnAngle);
+            frontLeftWheel.set(driveDirection - turnAngle, driveSpeed);
         }
         //FRONT RIGHT
-        //directly at the front right wheel is 45 degrees
-        if (closestAngle(driveDirection, 45.0) < 90) {
+        //directly at the front right wheel is 315 degrees
+        if (closestAngle(driveDirection, 315.0) < 90) {
             //front
             //tilt right
-            frontRightWheel.setDirection(driveDirection + turnAngle);
+            frontRightWheel.set(driveDirection + turnAngle, driveSpeed);
         } else {
             //back
             //tilt left
-            frontRightWheel.setDirection(driveDirection - turnAngle);
+            frontRightWheel.set(driveDirection - turnAngle, driveSpeed);
         }
 
         //BACK LEFT
-        //directly at back left wheel is 225 degrees
-        if (closestAngle(driveDirection, 225.0) < 90) {
+        //directly at back left wheel is 135 degrees
+        if (closestAngle(driveDirection, 135.0) < 90) {
             //front
             //tilt right
-            backLeftWheel.setDirection(driveDirection + turnAngle);
+            backLeftWheel.set(driveDirection + turnAngle, driveSpeed);
         } else {
             //back
             //tilt left
-            backLeftWheel.setDirection(driveDirection - turnAngle);
+            backLeftWheel.set(driveDirection - turnAngle, driveSpeed);
         }
 
         //BACK RIGHT
-        //directly at back right wheel is 135 degrees
-        if (closestAngle(driveDirection, 135.0) <= 90) {
+        //directly at back right wheel is 225 degrees
+        if (closestAngle(driveDirection, 225.0) <= 90) {
             //front
             //tilt right
-            backRightWheel.setDirection(driveDirection + turnAngle);
+            backRightWheel.set(driveDirection + turnAngle, driveSpeed);
         } else {
             //back
             //tilt left
-            backRightWheel.setDirection(driveDirection - turnAngle);
+            backRightWheel.set(driveDirection - turnAngle, driveSpeed);
         }
-
-        frontLeftWheel.setSpeed(driveSpeed);
-        frontRightWheel.setSpeed(driveSpeed);
-        backLeftWheel.setSpeed(driveSpeed);
-        backRightWheel.setSpeed(driveSpeed);
     }
 
     private static double closestAngle(double a, double b)
@@ -131,5 +122,15 @@ public class SwerveDriveController {
                 dir = -(Math.signum(dir) * 360.0) + dir;
         }
         return dir;
+    }
+
+    private static double convert(double a) {
+        if (a > 360) {
+            return (a-360.0);
+        }
+        if (a < 0) {
+            return (a+360.0);
+        }
+        return a;
     }
 }

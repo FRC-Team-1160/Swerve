@@ -10,11 +10,10 @@ import frc.robot.subsystems.DriveTrain.DriveTrain;
 
 import frc.robot.Constants.OIConstants;
 
-public class SwerveDrive extends CommandBase {
+public class TestRotator extends CommandBase {
   /** Creates a new SwerveDrive. */
   DriveTrain m_drive;
-  private Joystick m_mainStick = new Joystick(OIConstants.mainStickPort);
-  public SwerveDrive(DriveTrain m_drive) {
+  public TestRotator(DriveTrain m_drive) {
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(m_drive);
     this.m_drive = m_drive;
@@ -27,30 +26,7 @@ public class SwerveDrive extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    double xAngle = m_mainStick.getRawAxis(0);
-    double yAngle = m_mainStick.getRawAxis(1);
-    double angle = Math.toDegrees(Math.atan((yAngle/xAngle)/2)) + 90;
-    if (xAngle < 0) {
-      angle += 180;
-    }
-    double mag = Math.sqrt(xAngle*xAngle + yAngle*yAngle);
-    if (mag > 1) {
-      mag = 1;
-    }
-    mag *= 0.3;
-    double turn = m_mainStick.getRawAxis(4);
-    //field oriented
-    double gyroAngle = m_drive.getGyroAngle();
-    if (gyroAngle < 0) {
-      gyroAngle += 360;
-    }
-
-    angle -= m_drive.getGyroAngle();
-    if (angle < 0) {
-      angle += 360;
-    }
-
-    m_drive.m_controller.setSwerveDrive(angle, mag, turn);
+    m_drive.turnBackRight(0.1);
 
   }
 
