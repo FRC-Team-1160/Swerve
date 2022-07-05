@@ -15,19 +15,25 @@ public final class Constants {
 
   public static final class PortConstants {
     // CAN ID 
-    public static final int FRONT_LEFT_ROTATION_DRIVE = 0;
-    public static final int FRONT_RIGHT_ROTATION_DRIVE = 0;
-    public static final int BACK_LEFT_ROTATION_DRIVE = 0;
-    public static final int BACK_RIGHT_ROTATION_DRIVE = 0;
+    public static final int FRONT_LEFT_ROTATION_DRIVE = 1;
+    public static final int FRONT_RIGHT_ROTATION_DRIVE = 3;
+    public static final int BACK_LEFT_ROTATION_DRIVE = 5;
+    public static final int BACK_RIGHT_ROTATION_DRIVE = 7;
 
-    public static final int FRONT_LEFT_DIRECTION_DRIVE = 0;
-    public static final int FRONT_RIGHT_DIRECTION_DRIVE = 0;
-    public static final int BACK_LEFT_DIRECTION_DRIVE = 0;
-    public static final int BACK_RIGHT_DIRECTION_DRIVE = 0;
+    public static final int FRONT_LEFT_DIRECTION_DRIVE = 2;
+    public static final int FRONT_RIGHT_DIRECTION_DRIVE = 4;
+    public static final int BACK_LEFT_DIRECTION_DRIVE = 6;
+    public static final int BACK_RIGHT_DIRECTION_DRIVE = 8;
+
+    public static final int FRONT_LEFT_CODER_DRIVE = 1;
+    public static final int FRONT_RIGHT_CODER_DRIVE = 3;
+    public static final int BACK_LEFT_CODER_DRIVE = 5;
+    public static final int BACK_RIGHT_CODER_DRIVE = 7;
   }
 
   public static final class SwerveConstants{
     public static final double centerToMotor = 0;//Distance from center of motor to center of robot
+    public static final double unitsToRotations = (2048/360);
   }
 
   public static final class OIConstants {
