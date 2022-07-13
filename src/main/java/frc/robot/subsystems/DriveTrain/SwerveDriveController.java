@@ -23,7 +23,7 @@ public class SwerveDriveController {
     //chooses either turning in place or turning while driving
     public void setSwerveDrive(double driveDirection, double driveSpeed, double turnSpeed) {
         //this.driveTurn(driveDirection, driveSpeed, turnSpeed);
-        if ((driveSpeed <= 0.01) && (turnSpeed != 0.0)) {
+        if ((driveSpeed <= 0.02) && (Math.abs(turnSpeed) != 0.0)) {
             //turns without driving if no drive speed
             this.turn(turnSpeed);
         } else {
@@ -45,7 +45,7 @@ public class SwerveDriveController {
     //TURN WITHOUT DRIVING
     public void turn(double speed) {
         //zero is facing forward
-        speed *= 0.5;
+        speed *= 0.3;
         frontLeftWheel.set(45.0, speed);
         frontRightWheel.set(135.0, speed);
         backLeftWheel.set(315.0, speed);
@@ -57,6 +57,7 @@ public class SwerveDriveController {
     public void driveTurn(double driveDirection, double driveSpeed, double turnSpeed) {
         //turn Speed is value fron -1.0 to 1.0 with -1 being max left and 1 being max right
         double turnAngle = turnSpeed * 45.0;
+        driveSpeed *= Math.abs(turnSpeed)*0.45 + 1;
         SmartDashboard.putNumber("turn Angle", turnAngle);
 
         //determine if wheel is in front or in back

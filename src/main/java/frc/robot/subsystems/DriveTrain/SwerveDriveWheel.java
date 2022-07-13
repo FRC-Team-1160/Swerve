@@ -99,8 +99,8 @@ public class SwerveDriveWheel
                 error -= 360;
             }
             output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
-            speed = -speed;
-            output = (Math.abs(output));
+            speed = (speed);
+            output = -(Math.abs(output));
         } else if (mode == 4) {
             error = Math.abs((setpoint+360) - currentAngle);
             if (error > 360) {

@@ -5,6 +5,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DriveTrain.DriveTrain;
 
@@ -37,7 +38,7 @@ public class SwerveDrive extends CommandBase {
     if (mag > 1) {
       mag = 1;
     }
-    mag *= 0.5;
+    mag *= 0.3;
     double turn = m_mainStick.getRawAxis(4);
     //field oriented
     double gyroAngle = m_drive.getGyroAngle();
