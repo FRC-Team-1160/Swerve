@@ -29,6 +29,8 @@ public final class Constants {
     public static final int FRONT_RIGHT_CODER_DRIVE = 3;
     public static final int BACK_LEFT_CODER_DRIVE = 5;
     public static final int BACK_RIGHT_CODER_DRIVE = 7;
+
+    public static final int GATE = 0;
   }
 
   public static final class SwerveConstants{

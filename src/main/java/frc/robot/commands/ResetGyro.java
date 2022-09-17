@@ -11,12 +11,10 @@ import frc.robot.subsystems.DriveTrain.DriveTrain;
 
 import frc.robot.Constants.OIConstants;
 
-public class SwerveDrive extends CommandBase {
+public class ResetGyro extends CommandBase {
   /** Creates a new SwerveDrive. */
-  private double angle;
   DriveTrain m_drive;
-  private Joystick m_mainStick = new Joystick(OIConstants.mainStickPort);
-  public SwerveDrive(DriveTrain m_drive) {
+  public ResetGyro(DriveTrain m_drive) {
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(m_drive);
     this.m_drive = m_drive;
@@ -24,42 +22,14 @@ public class SwerveDrive extends CommandBase {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+      m_drive.resetGyro();
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    double xAngle = m_mainStick.getRawAxis(0);
-    double yAngle = m_mainStick.getRawAxis(1);
     
-    double mag = Math.sqrt(xAngle*xAngle + yAngle*yAngle);
-    if (mag > 1) {
-      mag = 1;
-    }
-    
-    double turn = m_mainStick.getRawAxis(4);
-    //field oriented
-    if (mag < 0.02) {
-      angle = angle;
-    } else {
-      angle = Math.toDegrees(Math.atan((yAngle/xAngle)/2)) + 90;
-      if (xAngle < 0) {
-        angle += 180;
-      }
-      double gyroAngle = m_drive.getGyroAngle();
-      if (gyroAngle < 0) {
-        gyroAngle += 360;
-      }
-
-      angle -= m_drive.getGyroAngle();
-      if (angle < 0) {
-        angle += 360;
-      }
-    }
-    mag *= 0.3;
-
-    m_drive.m_controller.setSwerveDrive(angle, mag, turn);
-
   }
 
   // Called once the command ends or is interrupted.
@@ -69,6 +39,6 @@ public class SwerveDrive extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return true;
   }
 }

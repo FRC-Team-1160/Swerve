@@ -30,6 +30,7 @@ public class SwerveDriveController {
             //either only drives if turnspeed is 0
             //or drives and turns at the same time if turnspeed is not 0
             this.driveTurn(driveDirection, driveSpeed, turnSpeed);
+
         }
     }
 
@@ -57,9 +58,9 @@ public class SwerveDriveController {
     public void driveTurn(double driveDirection, double driveSpeed, double turnSpeed) {
         //turn Speed is value fron -1.0 to 1.0 with -1 being max left and 1 being max right
         double turnAngle = turnSpeed * 45.0;
-        driveSpeed *= Math.abs(turnSpeed)*0.45 + 1;
+        //while turning, can turn a maximum of 40 degrees
+        driveSpeed *= (Math.log(Math.abs(turnSpeed)+1)/Math.log(3))*0.45 + 1;
         SmartDashboard.putNumber("turn Angle", turnAngle);
-
         //determine if wheel is in front or in back
         //for example: if the direction was to the right and the robot was facing forward,
         //the frontRight and backRight wheel would be front and the frontLeft and backLeft wheels would be in back
