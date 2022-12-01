@@ -19,9 +19,13 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.SerialPort.Port;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.PortConstants;
@@ -54,6 +58,8 @@ public class DriveTrain extends SubsystemBase{
 
   private Translation2d m_frontLeftLocation, m_frontRightLocation, m_backLeftLocation, m_backRightLocation;
   private SwerveDriveKinematics m_kinematics;
+
+  private Solenoid m_gate;
 
   double wkP, wkI, wkD;
 //
@@ -135,16 +141,28 @@ public class DriveTrain extends SubsystemBase{
     );
 
     m_gyro.zeroYaw();
+    //m_gate = new Solenoid(PneumaticsModuleType.CTREPCM, PortConstants.GATE);
   }
 
   public double getGyroAngle() {
     return m_gyro.getYaw();
   }
 
+  public void resetGyro() {
+    m_gyro.zeroYaw();
+  }
+
   public void turnBackRight(double speed) {
     m_backRightRotationMotor.set(TalonFXControlMode.PercentOutput, speed);
   }
 
+  public void setGate(boolean b) {
+    m_gate.set(b);
+  }
+
+  public boolean getGateStatus() {
+    return m_gate.get();
+  }
   
   @Override
   public void periodic() {
@@ -170,5 +188,6 @@ public class DriveTrain extends SubsystemBase{
     SmartDashboard.putNumber("FRCoder", m_frontRightCoder.getAbsolutePosition());
     SmartDashboard.putNumber("BLCoder", m_backLeftCoder.getAbsolutePosition());
     SmartDashboard.putNumber("BRCoder", m_backRightCoder.getAbsolutePosition());
+    SmartDashboard.putBoolean("Solenoid status", m_gate.get());
   }
 }

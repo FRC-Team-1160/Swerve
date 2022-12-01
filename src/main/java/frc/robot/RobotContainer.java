@@ -9,8 +9,10 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.OIConstants;
+import frc.robot.commands.ResetGyro;
 import frc.robot.commands.SwerveDrive;
 import frc.robot.commands.TestRotator;
+import frc.robot.commands.ToggleGate;
 import frc.robot.subsystems.DriveTrain.DriveTrain;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
@@ -70,6 +72,17 @@ public class RobotContainer {
         .whileHeld(
           new TestRotator(m_driveTrain)
         );
+
+      new JoystickButton(m_mainStick, Button.kStart.value)
+        .whenPressed(
+          new ResetGyro(m_driveTrain)
+        );
+
+      new JoystickButton(m_mainStick, Button.kX.value)
+        .whenPressed(
+          new ToggleGate(m_driveTrain)
+        );
+
     }
 
     /**
