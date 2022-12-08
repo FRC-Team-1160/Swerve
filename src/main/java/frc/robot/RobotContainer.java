@@ -78,10 +78,10 @@ public class RobotContainer {
           new ResetGyro(m_driveTrain)
         );
 
-      new JoystickButton(m_mainStick, Button.kX.value)
+      /*ew JoystickButton(m_mainStick, Button.kX.value)
         .whenPressed(
           new ToggleGate(m_driveTrain)
-        );
+        );*/
 
     }
 

@@ -188,6 +188,5 @@ public class DriveTrain extends SubsystemBase{
     SmartDashboard.putNumber("FRCoder", m_frontRightCoder.getAbsolutePosition());
     SmartDashboard.putNumber("BLCoder", m_backLeftCoder.getAbsolutePosition());
     SmartDashboard.putNumber("BRCoder", m_backRightCoder.getAbsolutePosition());
-    SmartDashboard.putBoolean("Solenoid status", m_gate.get());
   }
 }
