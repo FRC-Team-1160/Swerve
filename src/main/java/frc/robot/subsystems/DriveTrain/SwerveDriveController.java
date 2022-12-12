@@ -13,7 +13,10 @@ public class SwerveDriveController {
 
     public double angleToLoc(double ogRot)
     {
-        //do later, change -180-180 to 360
+        if(ogRot < 0)
+        {
+            return ogRot + 360;
+        }
         return ogRot;
     }
 

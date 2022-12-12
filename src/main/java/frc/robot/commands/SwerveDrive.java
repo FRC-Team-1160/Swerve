@@ -39,6 +39,7 @@ public class SwerveDrive extends CommandBase {
     
     double turn = m_mainStick.getRawAxis(4);
     //field oriented
+    /*
     if (mag < 0.02) {
       angle = angle;
     } else {
@@ -57,8 +58,11 @@ public class SwerveDrive extends CommandBase {
       }
     }
     mag *= 0.3;
-
-    m_drive.m_controller.setSwerveDrive(angle, mag, turn);
+    */
+    double temp = xAngle * Math.cos(turn) + yAngle*Math.sin(turn);
+    yAngle = -1*xAngle * Math.sin(turn) + yAngle*Math.cos(turn);
+    xAngle = temp;
+    m_drive.m_controller.setSwerveDrive(xAngle, yAngle, turn);
 
   }
 
