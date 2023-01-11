@@ -13,7 +13,9 @@ import frc.robot.Constants.OIConstants;
 
 public class SwerveDrive extends CommandBase {
   /** Creates a new SwerveDrive. */
-  private double angle;
+  private double x;
+  private double y;
+  private double spd;
   DriveTrain m_drive;
   private Joystick m_mainStick = new Joystick(OIConstants.mainStickPort);
   public SwerveDrive(DriveTrain m_drive) {
@@ -24,45 +26,39 @@ public class SwerveDrive extends CommandBase {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    x = m_mainStick.getRawAxis(0);
+    y = -m_mainStick.getRawAxis(1);
+    spd = 0.3;
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    double xAngle = m_mainStick.getRawAxis(0);
-    double yAngle = m_mainStick.getRawAxis(1);
     
-    double mag = Math.sqrt(xAngle*xAngle + yAngle*yAngle);
+    double joystickX = m_mainStick.getRawAxis(0);
+    double joystickY = -m_mainStick.getRawAxis(1);
+
+    double mag = Math.sqrt(joystickX*joystickX + joystickY*joystickY);
     if (mag > 1) {
       mag = 1;
     }
-    
-    double turn = m_mainStick.getRawAxis(4);
-    //field oriented
-    /*
-    if (mag < 0.02) {
-      angle = angle;
-    } else {
-      angle = Math.toDegrees(Math.atan((yAngle/xAngle)/2)) + 90;
-      if (xAngle < 0) {
-        angle += 180;
-      }
-      double gyroAngle = m_drive.getGyroAngle();
-      if (gyroAngle < 0) {
-        gyroAngle += 360;
-      }
 
-      angle -= m_drive.getGyroAngle();
-      if (angle < 0) {
-        angle += 360;
-      }
+    double turn = m_mainStick.getRawAxis(4);
+    double gyroAngle = Math.toRadians(m_drive.getGyroAngle());
+        //field oriented
+    if (mag > 0.02) {
+      x = m_mainStick.getRawAxis(0);
+      y = -m_mainStick.getRawAxis(1);
+      double temp = y * Math.cos(gyroAngle) + x*Math.sin(gyroAngle);
+      x = -1*y * Math.sin(gyroAngle) + x*Math.cos(gyroAngle);
+      y = temp;
+      spd = 0.3;
+    } else {
+      spd = 0.0001;
     }
-    mag *= 0.3;
-    */
-    double temp = xAngle * Math.cos(turn) + yAngle*Math.sin(turn);
-    yAngle = -1*xAngle * Math.sin(turn) + yAngle*Math.cos(turn);
-    xAngle = temp;
-    m_drive.m_controller.setSwerveDrive(xAngle, yAngle, turn);
+    
+    m_drive.m_controller.setSwerveDrive(spd*y, spd*x, spd*turn, gyroAngle);
 
   }
 

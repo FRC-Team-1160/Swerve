@@ -28,7 +28,8 @@ public class SwerveDriveController {
     }
 
     //chooses either turning in place or turning while driving
-    public void setSwerveDrive(double fwd, double str, double rot) {
+    public void setSwerveDrive(double fwd, double str, double rot, double gyroAngle) {
+
         double l = frc.robot.Constants.SwerveConstants.l;
         double r = frc.robot.Constants.SwerveConstants.r;
         double w = frc.robot.Constants.SwerveConstants.w;
@@ -42,10 +43,10 @@ public class SwerveDriveController {
 		double ws3 = Math.sqrt((a * a) + (d * d));//bittom left
 		double ws4 = Math.sqrt((a * a) + (c * c));//bottom right
 
-		double wa1 = Math.atan2(b, c) * 180 / Math.PI;
-		double wa2 = Math.atan2(b, d) * 180 / Math.PI;
-		double wa3 = Math.atan2(a, d) * 180 / Math.PI;
-		double wa4 = Math.atan2(a, c) * 180 / Math.PI;
+		double wa1 = (Math.atan2(b, c) * 180 / Math.PI);// + gyroAngle ;
+		double wa2 = (Math.atan2(b, d) * 180 / Math.PI);// + gyroAngle;
+		double wa3 = (Math.atan2(a, d) * 180 / Math.PI);// + gyroAngle;
+		double wa4 = (Math.atan2(a, c) * 180 / Math.PI);// + gyroAngle;
 
 		double max = ws1;
 		max = Math.max(max, ws2);
