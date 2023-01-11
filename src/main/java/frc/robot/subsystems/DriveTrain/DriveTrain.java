@@ -167,7 +167,7 @@ public class DriveTrain extends SubsystemBase{
   @Override
   public void periodic() {
     double xAngle = m_mainStick.getRawAxis(0);
-    double yAngle = m_mainStick.getRawAxis(1);
+    double yAngle = -m_mainStick.getRawAxis(1);
     double angle = Math.toDegrees(Math.atan((yAngle/xAngle)/2)) + 90;
     if (xAngle < 0) {
       angle += 180;
@@ -188,6 +188,5 @@ public class DriveTrain extends SubsystemBase{
     SmartDashboard.putNumber("FRCoder", m_frontRightCoder.getAbsolutePosition());
     SmartDashboard.putNumber("BLCoder", m_backLeftCoder.getAbsolutePosition());
     SmartDashboard.putNumber("BRCoder", m_backRightCoder.getAbsolutePosition());
-    SmartDashboard.putBoolean("Solenoid status", m_gate.get());
   }
 }

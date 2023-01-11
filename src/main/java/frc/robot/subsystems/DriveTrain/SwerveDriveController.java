@@ -10,8 +10,15 @@ public class SwerveDriveController {
     SwerveDriveWheel frontRightWheel;
     SwerveDriveWheel backLeftWheel;
     SwerveDriveWheel backRightWheel;
-    
 
+    public double angleToLoc(double ogRot)
+    {
+        if(ogRot < 0)
+        {
+            return ogRot + 360;
+        }
+        return ogRot;
+    }
 
     public SwerveDriveController(SwerveDriveWheel frontLeftWheel, SwerveDriveWheel frontRightWheel, SwerveDriveWheel backLeftWheel, SwerveDriveWheel backRightWheel) {
         this.frontLeftWheel = frontLeftWheel;
@@ -21,9 +28,42 @@ public class SwerveDriveController {
     }
 
     //chooses either turning in place or turning while driving
-    public void setSwerveDrive(double driveDirection, double driveSpeed, double turnSpeed) {
+    public void setSwerveDrive(double fwd, double str, double rot, double gyroAngle) {
+
+        double l = frc.robot.Constants.SwerveConstants.l;
+        double r = frc.robot.Constants.SwerveConstants.r;
+        double w = frc.robot.Constants.SwerveConstants.w;
+        double a = str - (rot * (l / r));
+		double b = str + (rot * (l / r));
+		double c = fwd - (rot * (w / r));
+		double d = fwd + (rot * (w / r));
+
+		double ws1 = Math.sqrt((b * b) + (c * c));//top right
+		double ws2 = Math.sqrt((b * b) + (d * d));//top left
+		double ws3 = Math.sqrt((a * a) + (d * d));//bittom left
+		double ws4 = Math.sqrt((a * a) + (c * c));//bottom right
+
+		double wa1 = (Math.atan2(b, c) * 180 / Math.PI);// + gyroAngle ;
+		double wa2 = (Math.atan2(b, d) * 180 / Math.PI);// + gyroAngle;
+		double wa3 = (Math.atan2(a, d) * 180 / Math.PI);// + gyroAngle;
+		double wa4 = (Math.atan2(a, c) * 180 / Math.PI);// + gyroAngle;
+
+		double max = ws1;
+		max = Math.max(max, ws2);
+		max = Math.max(max, ws3);
+		max = Math.max(max, ws4);
+		if (max > 1) {
+			ws1 /= max;
+			ws2 /= max;
+			ws3 /= max;
+			ws4 /= max;
+		}
+        frontRightWheel.set(angleToLoc(wa1), ws1);
+        frontLeftWheel.set(angleToLoc(wa2), ws2);
+        backLeftWheel.set(angleToLoc(wa3), ws3);
+        backRightWheel.set(angleToLoc(wa4), ws4);
         //this.driveTurn(driveDirection, driveSpeed, turnSpeed);
-        if ((driveSpeed <= 0.02) && (Math.abs(turnSpeed) != 0.0)) {
+        /*if ((driveSpeed <= 0.02) && (Math.abs(turnSpeed) != 0.0)) {
             //turns without driving if no drive speed
             this.turn(turnSpeed);
         } else {
@@ -32,6 +72,9 @@ public class SwerveDriveController {
             this.driveTurn(driveDirection, driveSpeed, turnSpeed);
 
         }
+        */
+
+        
     }
 
     //DRIVE WITHOUT TURNING

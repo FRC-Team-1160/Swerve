@@ -6,6 +6,13 @@
   "configurations": [
     {
       "type": "java",
+      "name": "Launch Dashboard",
+      "request": "launch",
+      "mainClass": "frc.robot.graphics.Dashboard",
+      "projectName": "Swerve"
+    },
+    {
+      "type": "java",
       "name": "Launch Main",
       "request": "launch",
       "mainClass": "frc.robot.Main",
