@@ -2,6 +2,8 @@ package frc.robot.subsystems.DriveTrain;
 
 import org.ejml.dense.row.mult.SubmatrixOps_FDRM;
 
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.SwerveConstants;
 
@@ -20,19 +22,35 @@ public class SwerveDriveController {
         return ogRot;
     }
 
+    public void brake(double amm) {
+        frontLeftWheel.brake(amm);
+        frontRightWheel.brake(amm);
+        backLeftWheel.brake(amm);
+        backRightWheel.brake(amm);
+    }
+
     public SwerveDriveController(SwerveDriveWheel frontLeftWheel, SwerveDriveWheel frontRightWheel, SwerveDriveWheel backLeftWheel, SwerveDriveWheel backRightWheel) {
         this.frontLeftWheel = frontLeftWheel;
         this.frontRightWheel = frontRightWheel;
         this.backLeftWheel = backLeftWheel;
         this.backRightWheel = backRightWheel;
+        /*// Locations for the swerve drive modules relative to the robot center.
+        Translation2d m_frontLeftLocation = new Translation2d(SwerveConstants.l, SwerveConstants.r);
+        Translation2d m_frontRightLocation = new Translation2d(SwerveConstants.l, -SwerveConstants.r);
+        Translation2d m_backLeftLocation = new Translation2d(-SwerveConstants.l, SwerveConstants.r);
+        Translation2d m_backRightLocation = new Translation2d(-SwerveConstants.l, -SwerveConstants.r);
+
+        // Creating my kinematics object using the module locations
+        SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(m_frontLeftLocation, m_frontRightLocation, m_backLeftLocation, m_backRightLocation);
+        */
     }
 
     //chooses either turning in place or turning while driving
     public void setSwerveDrive(double fwd, double str, double rot, double gyroAngle) {
 
-        double l = frc.robot.Constants.SwerveConstants.l;
-        double r = frc.robot.Constants.SwerveConstants.r;
-        double w = frc.robot.Constants.SwerveConstants.w;
+        double l = SwerveConstants.l;
+        double r = SwerveConstants.r;
+        double w = SwerveConstants.w;
         double a = str - (rot * (l / r));
 		double b = str + (rot * (l / r));
 		double c = fwd - (rot * (w / r));

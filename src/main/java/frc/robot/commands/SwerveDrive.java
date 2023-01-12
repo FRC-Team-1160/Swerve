@@ -38,6 +38,7 @@ public class SwerveDrive extends CommandBase {
     
     double joystickX = m_mainStick.getRawAxis(0);
     double joystickY = -m_mainStick.getRawAxis(1);
+    double joystickBrake = m_mainStick.getRawAxis(2);
 
     double mag = Math.sqrt(joystickX*joystickX + joystickY*joystickY);
     if (mag > 1) {
@@ -54,11 +55,16 @@ public class SwerveDrive extends CommandBase {
       x = -1*y * Math.sin(gyroAngle) + x*Math.cos(gyroAngle);
       y = temp;
       spd = 0.3;
+
+
     } else {
+      //IMPLEMENT SLOW DOWN 
       spd = 0.0001;
     }
+    double turnspd = 0.3;
     
-    m_drive.m_controller.setSwerveDrive(spd*y, spd*x, spd*turn, gyroAngle);
+    if (joystickBrake > 0.2) spd = -0.075*joystickBrake; // does not work fully, only works when moving
+    m_drive.m_controller.setSwerveDrive(spd*y, spd*x, turnspd*turn, gyroAngle);
 
   }
 

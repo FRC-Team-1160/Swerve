@@ -34,6 +34,10 @@ public class SwerveDriveWheel
         kFF = 0.05;
     }
 
+    public void brake(double amm) {
+        rotationMotor.set(TalonFXControlMode.PercentOutput, rotationSensor.getVelocity() * amm * -0.25);
+    }
+
     public void set(double setpoint, double speed)
     {
         //choose the fastest rotation direction and wheel direction
