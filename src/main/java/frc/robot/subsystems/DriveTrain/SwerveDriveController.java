@@ -10,6 +10,8 @@ public class SwerveDriveController {
     SwerveDriveWheel frontRightWheel;
     SwerveDriveWheel backLeftWheel;
     SwerveDriveWheel backRightWheel;
+    SwerveDriveOdometry m_odometry;
+    Pose2D m_pose;
 
     public double angleToLoc(double ogRot)
     {
@@ -25,6 +27,23 @@ public class SwerveDriveController {
         this.frontRightWheel = frontRightWheel;
         this.backLeftWheel = backLeftWheel;
         this.backRightWheel = backRightWheel;
+        Translation2d m_frontLeftLocation = new Translation2d(SwerveConstants.w, SwerveConstants.l);
+        Translation2d m_frontRightLocation = new Translation2d(SwerveConstants.w, -SwerveConstants.l);
+        Translation2d m_backLeftLocation = new Translation2d(-SwerveConstants.w, SwerveConstants.l);
+        Translation2d m_backRightLocation = new Translation2d(-SwerveConstants.w, -SwerveConstants.l);
+
+        SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
+                m_frontLeftLocation, m_frontRightLocation, m_backLeftLocation, m_backRightLocation
+        );
+
+        this.m_odometry = new SwerveDriveOdometry(
+                m_kinematics, m_gyro.getRotation2d(),
+                new SwerveModulePosition[] {
+                        frontLeftWheel.getPosition(),
+                        frontRightWheel.getPosition(),
+                        backLeftWheel.getPosition(),
+                        backRightWheel.getPosition()
+                }, new Pose2d(0.0, 0.0, new Rotation2d()));
     }
 
     //chooses either turning in place or turning while driving
@@ -62,6 +81,7 @@ public class SwerveDriveController {
         frontLeftWheel.set(angleToLoc(wa2), ws2);
         backLeftWheel.set(angleToLoc(wa3), ws3);
         backRightWheel.set(angleToLoc(wa4), ws4);
+    }
         //this.driveTurn(driveDirection, driveSpeed, turnSpeed);
         /*if ((driveSpeed <= 0.02) && (Math.abs(turnSpeed) != 0.0)) {
             //turns without driving if no drive speed

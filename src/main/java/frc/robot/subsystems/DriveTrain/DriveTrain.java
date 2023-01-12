@@ -130,16 +130,6 @@ public class DriveTrain extends SubsystemBase{
 
     m_gyro = new AHRS(Port.kMXP);
 
-    m_frontLeftLocation = new Translation2d(0.381, 0.381);
-    m_frontRightLocation = new Translation2d(0.381, -0.381);
-    m_backLeftLocation = new Translation2d(-0.381, 0.381);
-    m_backRightLocation = new Translation2d(-0.381, -0.381);
-
-    // Creating my kinematics object using the module locations
-    m_kinematics = new SwerveDriveKinematics(
-      m_frontLeftLocation, m_frontRightLocation, m_backLeftLocation, m_backRightLocation
-    );
-
     m_gyro.zeroYaw();
     //m_gate = new Solenoid(PneumaticsModuleType.CTREPCM, PortConstants.GATE);
   }
@@ -188,5 +178,13 @@ public class DriveTrain extends SubsystemBase{
     SmartDashboard.putNumber("FRCoder", m_frontRightCoder.getAbsolutePosition());
     SmartDashboard.putNumber("BLCoder", m_backLeftCoder.getAbsolutePosition());
     SmartDashboard.putNumber("BRCoder", m_backRightCoder.getAbsolutePosition());
+
+    var gyroAngle = m_gyro.getRotation2d();
+
+    m_controller.m_pose = m_controller.m_odometry.update(gyroAngle,
+            new SwerveModulePosition[] {
+                    m_frontLeftModule.getPosition(), m_frontRightModule.getPosition(),
+                    m_backLeftModule.getPosition(), m_backRightModule.getPosition()
+            });
   }
 }
