@@ -27,8 +27,7 @@ public class SwerveDriveWheel
         this.rotationMotor = rotationMotor;
         this.directionSensor = directionSensor;
         this.directionMotor = directionMotor;
-        
-        //this.directionController = new PIDController(P, I, D);
+
         kP = P;
         kI = I;
         kD = D;
@@ -76,52 +75,62 @@ public class SwerveDriveWheel
         7 = left back
         */
         double error, output;
-        if (mode == 0) {
+        switch (mode) {
+          case 0:
             error = Math.abs(setpoint - currentAngle) % 360;
             output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
             output = Math.abs(output);
             speed = -speed;
-        } else if (mode == 1) {
+            break;
+          case 1:
             error = Math.abs((setpoint+180) - currentAngle) % 360;
             output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
             output = Math.abs(output);
             speed = speed;
-        } else if (mode == 2) {
+            break;
+          case 2:
             error = Math.abs(setpoint - currentAngle) % 360;
             output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
             output = -(Math.abs(output));
             speed = -speed;
-        } else if (mode == 3) {
+            break;
+          case 3:
             error = Math.abs((setpoint-180) - currentAngle) % 360;
             output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
             speed = (speed);
             output = -(Math.abs(output));
-        } else if (mode == 4) {
+            break;
+          case 4:
             error = Math.abs((setpoint+360) - currentAngle) % 360;
             output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
             output = Math.abs(output);
             speed = -speed;
-        } else if (mode == 5) {
+            break;
+          case 5:
             error = Math.abs((setpoint+180) - currentAngle) % 360;
             output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
             output = Math.abs(output);
             speed = (speed);
-        } else if (mode == 6) {
+            break;
+          case 6:
             error = Math.abs((setpoint-360) - currentAngle) % 360;
             output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
             output = -(Math.abs(output));
             speed = -speed;
-        } else if (mode == 7) {
+            break;
+          case 7:
             error = Math.abs((setpoint-180) - currentAngle) % 360;
             output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
             output = -Math.abs(output);
             speed = speed;
-        } else {
+            break;
+          default:
             error = Math.abs(setpoint - currentAngle) % 360;
             output = (kP * error);
             output = Math.abs(output);
             speed = speed;
         }
+        //
         //output *= closestAngle(setpoint, currentAngle);
         SmartDashboard.putNumber("output", output);
         SmartDashboard.putNumber("speeed", speed);
@@ -130,7 +139,6 @@ public class SwerveDriveWheel
         directionMotor.set(TalonFXControlMode.PercentOutput, speed);
         SmartDashboard.putNumber("error", error);
         SmartDashboard.putNumber("setpoint", setpoint);
-        
     }
 
 
