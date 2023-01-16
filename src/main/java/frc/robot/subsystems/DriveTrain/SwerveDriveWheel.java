@@ -143,34 +143,33 @@ public class SwerveDriveWheel
 
 
     //returns true for turning right and false for turning left
-    private static int closestAngle(double a, double b) {
-        //a is setpoint, b is current Angle
+    private static int closestAngle(double setpoint, double current) {
 
-        if (Math.abs(a - b) <= 180 && a >= b) {
+        if (Math.abs(setpoint - current) <= 180 && setpoint >= current) {
             //turn right
-            if (Math.abs(a - b) <= 90) {
+            if (Math.abs(setpoint - current) <= 90) {
                 return 0;
             } else {
                 return 3;
             }
-        } else if (Math.abs(a - b) <= 180 && a < b) {
+        } else if (Math.abs(setpoint - current) <= 180 && setpoint < current) {
             //turn left
-            if (Math.abs(a - b) <= 90) {
+            if (Math.abs(setpoint - current) <= 90) {
                 return 2;
             } else {
                 return 1;
             }
             //crossing over 0
-        } else if (b >= a) {
+        } else if (current >= setpoint) {
             //turn right
-            if (Math.abs(a+180-b) > 90) {
+            if (Math.abs(setpoint+180-current) > 90) {
                 return 4;
             } else {
                 return 7;
             }
 
         } else {
-            if (Math.abs(a-180-b) > 90) {
+            if (Math.abs(setpoint-180-current) > 90) {
                 return 6;
             } else {
                 return 5;
