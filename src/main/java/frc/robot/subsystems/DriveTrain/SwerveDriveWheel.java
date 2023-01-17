@@ -40,140 +40,38 @@ public class SwerveDriveWheel
         return new SwerveModulePosition(directionSensor.getIntegratedSensorPosition(), Rotation2d.fromDegrees(rotationSensor.getAbsolutePosition()));
     }
 
+    private double normalizeAngle(double angle) {
+      angle = ((angle % 360) + 360) % 360;
+      if (angle > 180) {
+        angle -= 360;
+      }
+      return angle;
+    }
+
     public void set(double setpoint, double speed)
     {
-        //choose the fastest rotation direction and wheel direction
         double currentAngle = rotationSensor.getAbsolutePosition();
-        //choose the shorter direction
-        //unflipped wheel direction RUN PID
-        //divide by 180 to convert from angle to output volts
-       // double error = Math.abs(setpoint - currentAngle);
-        /*if (error < 30) {
-            accumulator += error;
-        }
-    
-        if (accumulator > maxA) {
-            accumulator = maxA;
-        } else if (accumulator < -maxA) {
-            accumulator = -maxA;
-        }*/
-        //increase output at low errors and decrease output at high errors
-
-        //double output = (kP * error);// + (kI * accumulator);// + ((0.4/(1+3*(Math.pow(Math.E, -0.01))))-0.06);
-        //double output = directionController.calculate(currentAngle, setpointAngle);
-        int mode = closestAngle(setpoint, currentAngle);
-        /*
-        0-3 do not cross 0 degree mark
-        0 = right forward
-        1 = right back
-        2 = left forward
-        3 = left back
-        4-7 do cross 0 degree mark
-        4 = right forward
-        5 = right back
-        6 = left forward
-        7 = left back
-        */
         double error, output;
-        switch (mode) {
-          case 0:
-            error = Math.abs(setpoint - currentAngle) % 360;
-            output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
-            output = Math.abs(output);
-            speed = -speed;
-            break;
-          case 1:
-            error = Math.abs((setpoint+180) - currentAngle) % 360;
-            output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
-            output = Math.abs(output);
-            speed = speed;
-            break;
-          case 2:
-            error = Math.abs(setpoint - currentAngle) % 360;
-            output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
-            output = -(Math.abs(output));
-            speed = -speed;
-            break;
-          case 3:
-            error = Math.abs((setpoint-180) - currentAngle) % 360;
-            output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
-            speed = (speed);
-            output = -(Math.abs(output));
-            break;
-          case 4:
-            error = Math.abs((setpoint+360) - currentAngle) % 360;
-            output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
-            output = Math.abs(output);
-            speed = -speed;
-            break;
-          case 5:
-            error = Math.abs((setpoint+180) - currentAngle) % 360;
-            output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
-            output = Math.abs(output);
-            speed = (speed);
-            break;
-          case 6:
-            error = Math.abs((setpoint-360) - currentAngle) % 360;
-            output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
-            output = -(Math.abs(output));
-            speed = -speed;
-            break;
-          case 7:
-            error = Math.abs((setpoint-180) - currentAngle) % 360;
-            output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
-            output = -Math.abs(output);
-            speed = speed;
-            break;
-          default:
-            error = Math.abs(setpoint - currentAngle) % 360;
-            output = (kP * error);
-            output = Math.abs(output);
-            speed = speed;
+        error = normalizeAngle(setpoint - currentAngle);
+
+        if (Math.abs(error)) > 90 {
+          setpoint = (setpoint + 180) % 360;
+          error = normalizeAngle(setpoint - currentAngle);
+          speed = -speed
         }
-        //
-        //output *= closestAngle(setpoint, currentAngle);
+
+        output = (kP * Math.abs(error)) + ((0.4/(1+3*(Math.exp(-0.01*Math.abs(error)))))-0.06);
+
+        if (error < 0) {
+          output = -output
+        }
+
+        rotationMotor.set(TalonFXControlMode.PercentOutput, output);
+        directionMotor.set(TalonFXControlMode.PercentOutput, speed);
+
         SmartDashboard.putNumber("output", output);
         SmartDashboard.putNumber("speeed", speed);
         SmartDashboard.putNumber("mode", mode);
-        rotationMotor.set(TalonFXControlMode.PercentOutput, output);
-        directionMotor.set(TalonFXControlMode.PercentOutput, speed);
         SmartDashboard.putNumber("error", error);
         SmartDashboard.putNumber("setpoint", setpoint);
-    }
-
-
-    //returns true for turning right and false for turning left
-    private static int closestAngle(double setpoint, double current) {
-
-        if (Math.abs(setpoint - current) <= 180 && setpoint >= current) {
-            //turn right
-            if (Math.abs(setpoint - current) <= 90) {
-                return 0;
-            } else {
-                return 3;
-            }
-        } else if (Math.abs(setpoint - current) <= 180 && setpoint < current) {
-            //turn left
-            if (Math.abs(setpoint - current) <= 90) {
-                return 2;
-            } else {
-                return 1;
-            }
-            //crossing over 0
-        } else if (current >= setpoint) {
-            //turn right
-            if (Math.abs(setpoint+180-current) > 90) {
-                return 4;
-            } else {
-                return 7;
-            }
-
-        } else {
-            if (Math.abs(setpoint-180-current) > 90) {
-                return 6;
-            } else {
-                return 5;
-            }
-        }
-    }
 }
