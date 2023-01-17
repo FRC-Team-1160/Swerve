@@ -94,17 +94,4 @@ public class SwerveDriveController {
         backLeftWheel.set(angleToLoc(wa3), ws3);
         backRightWheel.set(angleToLoc(wa4), ws4);
     }
-
-    private static double closestAngle(double a, double b)
-    {
-        if (Math.abs(a - b) <= 180) {
-            return Math.abs(a-b);
-        } else {
-            if (a > b) {
-                return Math.abs((a-360)-b);
-            } else {
-                return Math.abs((a+360)-b);
-            }
-        }
-    }
 }
