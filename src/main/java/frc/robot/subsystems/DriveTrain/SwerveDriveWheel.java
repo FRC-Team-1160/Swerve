@@ -77,74 +77,47 @@ public class SwerveDriveWheel
         */
         double error, output;
         if (mode == 0) {
-            error = Math.abs(setpoint - currentAngle);
-            if (error > 360) {
-                error -= 360;
-            }
+            error = Math.abs(setpoint - currentAngle) % 360;
             output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
             output = Math.abs(output);
             speed = -speed;
         } else if (mode == 1) {
-            error = Math.abs((setpoint+180) - currentAngle);
-            if (error > 360) {
-                error -= 360;
-            }
+            error = Math.abs((setpoint + 180) - currentAngle) % 360;
             output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
             output = Math.abs(output);
             speed = speed;
         } else if (mode == 2) {
-            error = Math.abs(setpoint - currentAngle);
-            if (error > 360) {
-                error -= 360;
-            }
+            error = Math.abs(setpoint - currentAngle) % 360;
             output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
             output = -(Math.abs(output));
             speed = -speed;
         } else if (mode == 3) {
-            error = Math.abs((setpoint-180) - currentAngle);
-            if (error > 360) {
-                error -= 360;
-            }
+            error = Math.abs((setpoint - 180) - currentAngle) % 360;
             output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
             speed = (speed);
             output = -(Math.abs(output));
         } else if (mode == 4) {
-            error = Math.abs((setpoint+360) - currentAngle);
-            if (error > 360) {
-                error -= 360;
-            }
+            error = Math.abs((setpoint + 360) - currentAngle) % 360;
             output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
             output = Math.abs(output);
             speed = -speed;
         } else if (mode == 5) {
-            error = Math.abs((setpoint+180) - currentAngle);
-            if (error > 360) {
-                error -= 360;
-            }
+            error = Math.abs((setpoint + 180) - currentAngle) % 360;
             output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
             output = Math.abs(output);
             speed = (speed);
         } else if (mode == 6) {
-            error = Math.abs((setpoint-360) - currentAngle);
-            if (error > 360) {
-                error -= 360;
-            }
+            error = Math.abs((setpoint - 360) - currentAngle) % 360;
             output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
             output = -(Math.abs(output));
             speed = -speed;
         } else if (mode == 7) {
-            error = Math.abs((setpoint-180) - currentAngle);
-            if (error > 360) {
-                error -= 360;
-            }
+            error = Math.abs((setpoint - 180) - currentAngle) % 360;
             output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
             output = -Math.abs(output);
             speed = speed;
         } else {
-            error = Math.abs(setpoint - currentAngle);
-            if (error > 360) {
-                error -= 360;
-            }
+            error = Math.abs(setpoint - currentAngle) % 360;
             output = (kP * error);
             output = Math.abs(output);
             speed = speed;

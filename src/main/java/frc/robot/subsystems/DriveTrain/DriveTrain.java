@@ -45,7 +45,13 @@ public class DriveTrain extends SubsystemBase{
 
   private TalonFXSensorCollection m_frontLeftRotationEncoder, m_frontRightRotationEncoder, m_backLeftRotationEncoder, m_backRightRotationEncoder;
 
-  private TalonFX m_frontLeftDirectionMotor, m_frontRightDirectionMotor, m_backLeftDirectionMotor, m_backRightDirectionMotor;
+  private static TalonFX m_frontLeftDirectionMotor;
+
+  private TalonFX m_frontRightDirectionMotor;
+
+  private TalonFX m_backLeftDirectionMotor;
+
+  private TalonFX m_backRightDirectionMotor;
 
   private TalonFXSensorCollection m_frontLeftDirectionEncoder, m_frontRightDirectionEncoder, m_backLeftDirectionEncoder, m_backRightDirectionEncoder;
 
@@ -75,65 +81,23 @@ public class DriveTrain extends SubsystemBase{
   }
 
   public DriveTrain() {
-    //directional motors
-    m_frontLeftDirectionMotor = new TalonFX(PortConstants.FRONT_LEFT_DIRECTION_DRIVE);
-    m_frontRightDirectionMotor = new TalonFX(PortConstants.FRONT_RIGHT_DIRECTION_DRIVE);
-    m_backLeftDirectionMotor = new TalonFX(PortConstants.BACK_LEFT_DIRECTION_DRIVE);
-    m_backRightDirectionMotor = new TalonFX(PortConstants.BACK_RIGHT_DIRECTION_DRIVE);
-
-    //directional encoders
-    m_frontLeftDirectionEncoder = m_frontLeftDirectionMotor.getSensorCollection();
-    m_frontRightDirectionEncoder = m_frontRightDirectionMotor.getSensorCollection();
-    m_backLeftDirectionEncoder = m_backLeftDirectionMotor.getSensorCollection();
-    m_backRightDirectionEncoder = m_backRightDirectionMotor.getSensorCollection();
-
-
-    //rotational motors
-    m_frontLeftRotationMotor = new TalonFX(PortConstants.FRONT_LEFT_ROTATION_DRIVE);
-    m_frontRightRotationMotor = new TalonFX(PortConstants.FRONT_RIGHT_ROTATION_DRIVE);
-    m_backLeftRotationMotor = new TalonFX(PortConstants.BACK_LEFT_ROTATION_DRIVE);
-    m_backRightRotationMotor = new TalonFX(PortConstants.BACK_RIGHT_ROTATION_DRIVE);
-
-    //rotational encoders
-    m_frontLeftRotationEncoder = m_frontLeftRotationMotor.getSensorCollection();
-    m_frontRightRotationEncoder = m_frontRightRotationMotor.getSensorCollection();
-    m_backLeftRotationEncoder = m_backLeftRotationMotor.getSensorCollection();
-    m_backRightRotationEncoder = m_backRightRotationMotor.getSensorCollection();
-
-    //CAN coedrs
-    m_frontLeftCoder = new CANCoder(PortConstants.FRONT_LEFT_CODER_DRIVE);
-    m_frontRightCoder = new CANCoder(PortConstants.FRONT_RIGHT_CODER_DRIVE);
-    m_backLeftCoder = new CANCoder(PortConstants.BACK_LEFT_CODER_DRIVE);
-    m_backRightCoder = new CANCoder(PortConstants.BACK_RIGHT_CODER_DRIVE);
-
-    /*m_frontLeftDirectionEncoder.setIntegratedSensorPosition(0, 0);
-    m_frontRightDirectionEncoder.setIntegratedSensorPosition(0, 0);
-    m_backLeftDirectionEncoder.setIntegratedSensorPosition(0, 0);
-    m_backRightDirectionEncoder.setIntegratedSensorPosition(0, 0);
-
-    m_frontLeftRotationEncoder.setIntegratedSensorPosition(0, 0);
-    m_frontRightRotationEncoder.setIntegratedSensorPosition(0, 0);
-    m_backLeftRotationEncoder.setIntegratedSensorPosition(0, 0);
-    m_backRightRotationEncoder.setIntegratedSensorPosition(0, 0);*/
 
     //swerve wheel PID values
     wkP = 0.005;
     wkI = 0.000001;
     wkD = 0;
 
-    //swerve wheels (controls the rotation and direction motors)
-    m_frontLeftWheel = new SwerveDriveWheel(wkP, wkI, wkD, m_frontLeftRotationMotor, m_frontLeftCoder, m_frontLeftDirectionMotor, m_frontLeftDirectionEncoder);
-    m_frontRightWheel = new SwerveDriveWheel(wkP, wkI, wkD, m_frontRightRotationMotor, m_frontRightCoder, m_frontRightDirectionMotor, m_frontRightDirectionEncoder);
-    m_backLeftWheel = new SwerveDriveWheel(wkP, wkI, wkD, m_backLeftRotationMotor, m_backLeftCoder, m_backLeftDirectionMotor, m_backLeftDirectionEncoder);
-    m_backRightWheel = new SwerveDriveWheel(wkP, wkI, wkD, m_backRightRotationMotor, m_backRightCoder, m_backRightDirectionMotor, m_backRightDirectionEncoder);
+    //swerve modules
 
-    
+    m_frontLeftWheel = initSwerveModule(wkP, wkI, wkD, PortConstants.FRONT_LEFT_DIRECTION_DRIVE, PortConstants.FRONT_LEFT_ROTATION_DRIVE, PortConstants.FRONT_LEFT_CODER_DRIVE);
+    m_frontRightWheel = initSwerveModule(wkP, wkI, wkD, PortConstants.FRONT_RIGHT_DIRECTION_DRIVE, PortConstants.FRONT_RIGHT_ROTATION_DRIVE, PortConstants.FRONT_RIGHT_CODER_DRIVE);
+    m_backLeftWheel = initSwerveModule(wkP, wkI, wkD, PortConstants.BACK_LEFT_DIRECTION_DRIVE, PortConstants.BACK_LEFT_ROTATION_DRIVE, PortConstants.BACK_LEFT_CODER_DRIVE);
+    m_backRightWheel = initSwerveModule(wkP, wkI, wkD, PortConstants.BACK_RIGHT_DIRECTION_DRIVE, PortConstants.BACK_RIGHT_ROTATION_DRIVE, PortConstants.BACK_RIGHT_CODER_DRIVE);
 
     m_gyro = new AHRS(Port.kMXP);
 
     m_gyro.zeroYaw();
     m_controller = new SwerveDriveController(m_frontLeftWheel, m_frontRightWheel, m_backLeftWheel, m_backRightWheel, m_gyro);
-    //m_gate = new Solenoid(PneumaticsModuleType.CTREPCM, PortConstants.GATE);
   }
 
   public double getGyroAngle() {
@@ -193,5 +157,13 @@ public class DriveTrain extends SubsystemBase{
     SmartDashboard.putNumber("Pose2DY", m_controller.m_pose.getY());
     SmartDashboard.putNumber("Pose2DX", m_controller.m_pose.getX());
     SmartDashboard.putNumber("Pose2DRotation", m_controller.m_pose.getRotation().getDegrees());
+  }
+
+  private static SwerveDriveWheel initSwerveModule(double P, double I, double D, int direction_drive, int rotation_drive, int coder_drive ) {
+    TalonFX directionMotor = new TalonFX(direction_drive);
+    TalonFXSensorCollection directionEncoder = directionMotor.getSensorCollection();
+    TalonFX rotationMotor = new TalonFX(rotation_drive);
+    CANCoder coder = new CANCoder(coder_drive);
+    return new SwerveDriveWheel(P, I, D, rotationMotor, coder, directionMotor, directionEncoder);
   }
 }
