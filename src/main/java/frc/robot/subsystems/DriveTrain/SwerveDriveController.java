@@ -94,12 +94,12 @@ public class SwerveDriveController {
         double rot2 = (c-d)/w;
         double rot = (rot1+rot2)/2;
 
-        double fwd1 = rot * (l/2) + a;
-        double fwd2 = -rot * (l/2) + b;
+        double fwd1 = rot * (l/2) + c;
+        double fwd2 = -rot * (l/2) + d;
         double tfwd = (fwd1 + fwd2)/2;
 
-        double str1 = rot * (w/2) + c;
-        double str2 = -rot * (w/2) + d;
+        double str1 = rot * (w/2) + a;
+        double str2 = -rot * (w/2) + b;
         double tstr = (str1 + str2)/2;
 
         //field centric
