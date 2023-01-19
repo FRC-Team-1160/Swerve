@@ -18,14 +18,12 @@ public class SwerveDriveWheel
     public TalonFX rotationMotor;
     public TalonFX directionMotor;
     public CANCoder rotationSensor;
-    public TalonFXSensorCollection directionSensor;
     double kFF, kP, kI, kD, accumulator, maxA;
 
-    public SwerveDriveWheel(double P, double I, double D, TalonFX rotationMotor, CANCoder rotationSensor, TalonFX directionMotor, TalonFXSensorCollection directionSensor)
+    public SwerveDriveWheel(double P, double I, double D, TalonFX rotationMotor, CANCoder rotationSensor, TalonFX directionMotor)
     {
         this.rotationSensor = rotationSensor;
         this.rotationMotor = rotationMotor;
-        this.directionSensor = directionSensor;
         this.directionMotor = directionMotor;
         
         //this.directionController = new PIDController(P, I, D);
@@ -38,7 +36,28 @@ public class SwerveDriveWheel
     }
 
     public SwerveModulePosition getModule() {
-        return new SwerveModulePosition(directionSensor.getIntegratedSensorPosition(), Rotation2d.fromDegrees(rotationSensor.getAbsolutePosition()));
+        return new SwerveModulePosition(getPosition(), Rotation2d.fromDegrees(rotationSensor.getAbsolutePosition()));
+    }
+
+    public double getVelocity() {
+        double v = directionMotor.getSelectedSensorVelocity();
+        v *= SwerveConstants.SWERVE_POSITION_RATIO*100;
+        return v; //meters per second
+    }
+
+    public double getPosition() {
+        double pos = directionMotor.getSelectedSensorPosition();
+        pos *= SwerveConstants.SWERVE_POSITION_RATIO;
+        return pos; //meters
+    
+    }
+
+    public double getRotation() {
+        return rotationSensor.getAbsolutePosition();
+    }
+
+    public void resetPosition() {
+        directionMotor.setSelectedSensorPosition(0);
     }
 
     public void set(double setpoint, double speed)
@@ -62,7 +81,7 @@ public class SwerveDriveWheel
 
         //double output = (kP * error);// + (kI * accumulator);// + ((0.4/(1+3*(Math.pow(Math.E, -0.01))))-0.06);
         //double output = directionController.calculate(currentAngle, setpointAngle);
-        int mode = closestAngle(setpoint, currentAngle);
+        //int mode = closestAngle(setpoint, currentAngle);
         /*
         0-3 do not cross 0 degree mark
         0 = right forward
@@ -75,7 +94,32 @@ public class SwerveDriveWheel
         6 = left forward
         7 = left back
         */
+        double angle = (((setpoint - currentAngle) % 360) + 360 ) % 360;
         double error, output;
+        
+        double setpointAngle = (setpoint % 360) - (currentAngle % 360); //the %360 for some of these really should not do anything, as setpoint and current_angle are always positive.
+        double setpointFAngle = ((setpoint+180)%360) - (currentAngle % 360);
+
+
+        if (Math.abs(setpointAngle) > 180) {
+            setpointAngle = -(Math.signum(setpointAngle) * 360.0) + setpointAngle;
+        }
+
+        if (Math.abs(setpointFAngle) > 180) {
+            setpointFAngle = -(Math.signum(setpointFAngle) * 360.0) + setpointFAngle;
+        }
+        error = Math.abs(Math.min(setpointAngle, setpointFAngle));
+        if (error > 90) {
+            error = 180 - error;
+        }
+        output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
+        if (angle % 180 > 90) {
+            output = -output;
+        }
+        if (angle < 90 || angle > 270) {
+            speed = -speed;
+        }
+        /*
         if (mode == 0) {
             error = Math.abs(setpoint - currentAngle) % 360;
             output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
@@ -121,11 +165,11 @@ public class SwerveDriveWheel
             output = (kP * error);
             output = Math.abs(output);
             speed = speed;
-        }
+        }*/
         //output *= closestAngle(setpoint, currentAngle);
         SmartDashboard.putNumber("output", output);
         SmartDashboard.putNumber("speeed", speed);
-        SmartDashboard.putNumber("mode", mode);
+        //SmartDashboard.putNumber("mode", mode);
         rotationMotor.set(TalonFXControlMode.PercentOutput, output);
         directionMotor.set(TalonFXControlMode.PercentOutput, speed);
         SmartDashboard.putNumber("error", error);
@@ -135,7 +179,7 @@ public class SwerveDriveWheel
 
 
     //returns true for turning right and false for turning left
-    private static int closestAngle(double a, double b) {
+    /*private static int closestAngle(double a, double b) {
         //a is setpoint, b is current Angle
 
         if (Math.abs(a - b) <= 180 && a >= b) {
@@ -168,6 +212,6 @@ public class SwerveDriveWheel
                 return 5;
             }
         }
-    }
+    }*/
     
 }

@@ -14,7 +14,9 @@ import com.ctre.phoenix.sensors.CANCoder;
 import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -30,6 +32,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.PortConstants;
+import frc.robot.Constants.SwerveConstants;
 
 
 public class DriveTrain extends SubsystemBase{
@@ -68,6 +71,8 @@ public class DriveTrain extends SubsystemBase{
 
   private Solenoid m_gate;
 
+  public Pose2d m_pose;
+
   double wkP, wkI, wkD;
 //
 
@@ -95,8 +100,9 @@ public class DriveTrain extends SubsystemBase{
     m_backRightWheel = initSwerveModule(wkP, wkI, wkD, PortConstants.BACK_RIGHT_DIRECTION_DRIVE, PortConstants.BACK_RIGHT_ROTATION_DRIVE, PortConstants.BACK_RIGHT_CODER_DRIVE);
 
     m_gyro = new AHRS(Port.kMXP);
-
+    
     m_gyro.zeroYaw();
+    m_pose = new Pose2d(0,0,m_gyro.getRotation2d());
     m_controller = new SwerveDriveController(m_frontLeftWheel, m_frontRightWheel, m_backLeftWheel, m_backRightWheel, m_gyro);
   }
 
@@ -104,8 +110,19 @@ public class DriveTrain extends SubsystemBase{
     return m_gyro.getYaw();
   }
 
+  public void resetWheelPositions() {
+    m_frontRightWheel.resetPosition();
+    m_frontLeftWheel.resetPosition();
+    m_backRightWheel.resetPosition();
+    m_backLeftWheel.resetPosition();
+  }
+
   public void resetGyro() {
     m_gyro.zeroYaw();
+  }
+
+  public void resetPose() {
+    m_pose = new Pose2d(0,0,m_gyro.getRotation2d());
   }
 
   public void turnBackRight(double speed) {
@@ -140,14 +157,24 @@ public class DriveTrain extends SubsystemBase{
     SmartDashboard.putNumber("Turn", turn);
     SmartDashboard.putNumber("Gyro Yaw", getGyroAngle());
 
-    SmartDashboard.putNumber("FLCoder", m_frontLeftCoder.getAbsolutePosition());
+    /*SmartDashboard.putNumber("FLCoder", m_frontLeftCoder.getAbsolutePosition());
     SmartDashboard.putNumber("FRCoder", m_frontRightCoder.getAbsolutePosition());
     SmartDashboard.putNumber("BLCoder", m_backLeftCoder.getAbsolutePosition());
-    SmartDashboard.putNumber("BRCoder", m_backRightCoder.getAbsolutePosition());
+    SmartDashboard.putNumber("BRCoder", m_backRightCoder.getAbsolutePosition());*/
+    double[] odom = m_controller.getSwerveOdometry(getGyroAngle());
+    double fwd = odom[0];
+    double str = odom[1];
+    double rot = odom[2];
+    Translation2d translation = new Translation2d(str*SwerveConstants.PERIODIC_SPEED, fwd*SwerveConstants.PERIODIC_SPEED);
+    Transform2d transform = new Transform2d(translation, Rotation2d.fromDegrees(rot));
+    m_pose = m_pose.plus(transform);
 
-    var gyroAngle = m_gyro.getRotation2d();
+    SmartDashboard.putNumber("Pose2DY", m_pose.getY());
+    SmartDashboard.putNumber("Pose2DX", m_pose.getX());
+    SmartDashboard.putNumber("Pose2DRotation", m_pose.getRotation().getDegrees());
+    
 
-    m_controller.m_pose = m_controller.m_odometry.update(gyroAngle,
+    /*m_controller.m_pose = m_controller.m_odometry.update(gyroAngle,
             new SwerveModulePosition[] {
               m_controller.frontLeftWheel.getModule(),
               m_controller.frontRightWheel.getModule(),
@@ -157,13 +184,16 @@ public class DriveTrain extends SubsystemBase{
     SmartDashboard.putNumber("Pose2DY", m_controller.m_pose.getY());
     SmartDashboard.putNumber("Pose2DX", m_controller.m_pose.getX());
     SmartDashboard.putNumber("Pose2DRotation", m_controller.m_pose.getRotation().getDegrees());
+    SmartDashboard.putNumber("Gyro Rotation2D", m_gyro.getRotation2d().getDegrees());*/
+    SmartDashboard.putNumber("FR wheel pos", m_frontRightWheel.getPosition());
   }
+
+  
 
   private static SwerveDriveWheel initSwerveModule(double P, double I, double D, int direction_drive, int rotation_drive, int coder_drive ) {
     TalonFX directionMotor = new TalonFX(direction_drive);
-    TalonFXSensorCollection directionEncoder = directionMotor.getSensorCollection();
     TalonFX rotationMotor = new TalonFX(rotation_drive);
     CANCoder coder = new CANCoder(coder_drive);
-    return new SwerveDriveWheel(P, I, D, rotationMotor, coder, directionMotor, directionEncoder);
+    return new SwerveDriveWheel(P, I, D, rotationMotor, coder, directionMotor);
   }
 }

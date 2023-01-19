@@ -48,6 +48,8 @@ public final class Constants {
     public static final double kMaxAccelerationMeterPerSecondSquared = 1;
     public static final double kSwerveB = 2;
     public static final double kSwerveZeta = 0.7;
+    public static final double SWERVE_POSITION_RATIO = 0.286/13824;
+    public static final double PERIODIC_SPEED = 0.02;
   }
 
   public static final class OIConstants {

@@ -16,6 +16,7 @@ public class SwerveDrive extends CommandBase {
   private double x;
   private double y;
   private double spd;
+  private double turnspd;
   DriveTrain m_drive;
   private Joystick m_mainStick = new Joystick(OIConstants.mainStickPort);
   public SwerveDrive(DriveTrain m_drive) {
@@ -30,6 +31,7 @@ public class SwerveDrive extends CommandBase {
     x = m_mainStick.getRawAxis(0);
     y = -m_mainStick.getRawAxis(1);
     spd = 0.3;
+    turnspd = 0.3;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -58,7 +60,7 @@ public class SwerveDrive extends CommandBase {
       spd = 0.0001;
     }
     
-    m_drive.m_controller.setSwerveDrive(spd*y, spd*x, spd*turn, gyroAngle);
+    m_drive.m_controller.setSwerveDrive(spd*y, spd*x, turnspd*turn, gyroAngle);
 
   }
 

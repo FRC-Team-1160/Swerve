@@ -8,8 +8,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OIConstants;
-import frc.robot.commands.ResetGyro;
+import frc.robot.commands.Reset;
 import frc.robot.commands.SwerveDrive;
 import frc.robot.commands.TestRotator;
 import frc.robot.commands.ToggleGate;
@@ -68,15 +69,8 @@ public class RobotContainer {
      */
     
     private void configureButtonBindings() {
-      new JoystickButton(m_mainStick, Button.kA.value)
-        .whileHeld(
-          new TestRotator(m_driveTrain)
-        );
-
-      new JoystickButton(m_mainStick, Button.kStart.value)
-        .whenPressed(
-          new ResetGyro(m_driveTrain)
-        );
+      Trigger startButton = new JoystickButton(m_mainStick, Button.kStart.value);
+      startButton.onTrue(new Reset(m_driveTrain));
 
       /*ew JoystickButton(m_mainStick, Button.kX.value)
         .whenPressed(

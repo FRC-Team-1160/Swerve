@@ -18,9 +18,10 @@ public class SwerveDriveController {
     public SwerveDriveWheel frontRightWheel;
     public SwerveDriveWheel backLeftWheel;
     public SwerveDriveWheel backRightWheel;
+    public double m_posx;
+    public double m_posy;
     public SwerveDriveKinematics m_kinematics;
     public SwerveDriveOdometry m_odometry;
-    public Pose2d m_pose;
 
     public double angleToLoc(double ogRot)
     {
@@ -29,6 +30,12 @@ public class SwerveDriveController {
             return ogRot + 360;
         }
         return ogRot;
+    }
+    public double locToAngle(double ogLoc) {
+        if (ogLoc > 180) {
+          ogLoc -= 360;
+        }
+        return ogLoc;
     }
 
     public SwerveDriveController(SwerveDriveWheel frontLeftWheel, SwerveDriveWheel frontRightWheel, SwerveDriveWheel backLeftWheel, SwerveDriveWheel backRightWheel, AHRS m_gyro) {
@@ -46,14 +53,68 @@ public class SwerveDriveController {
         );
 
 
-        m_odometry = new SwerveDriveOdometry(
+        /*m_odometry = new SwerveDriveOdometry(
             m_kinematics, m_gyro.getRotation2d(),
             new SwerveModulePosition[] {
                 this.frontLeftWheel.getModule(),
                 this.frontRightWheel.getModule(),
                 this.backLeftWheel.getModule(),
                 this.backRightWheel.getModule()
-            }, new Pose2d(0.0, 0.0, new Rotation2d()));
+            }, new Pose2d(0.0, 0.0, new Rotation2d()));*/
+    }
+
+    public double[] getSwerveOdometry(double gyroAngle) {
+        double l = SwerveConstants.l;
+        double w = SwerveConstants.w;
+        double wa1 = locToAngle(frontRightWheel.getRotation());
+        double wa2 = locToAngle(frontLeftWheel.getRotation());
+        double wa3 = locToAngle(backLeftWheel.getRotation());
+        double wa4 = locToAngle(backRightWheel.getRotation());
+
+        double ws1 = frontRightWheel.getVelocity();
+        double ws2 = frontLeftWheel.getVelocity();
+        double ws3 = backLeftWheel.getVelocity();
+        double ws4 = backRightWheel.getVelocity();
+        
+        double a3 = Math.sin(Math.toRadians(wa3))*ws3;
+        double a4 = Math.sin(Math.toRadians(wa4))*ws4;
+        double b2 = Math.sin(Math.toRadians(wa2))*ws2;
+        double b1 = Math.sin(Math.toRadians(wa1))*ws1;
+        double c1 = Math.cos(Math.toRadians(wa1))*ws1;
+        double c4 = Math.cos(Math.toRadians(wa4))*ws4;
+        double d2 = Math.cos(Math.toRadians(wa2))*ws2;
+        double d3 = Math.cos(Math.toRadians(wa3))*ws3;
+
+        double a = -(a3+a4)/2;
+        double b = -(b2+b1)/2;
+        double c = -(c1+c4)/2;
+        double d = -(d2+d3)/2;
+
+        double rot1 = (b-a)/l;
+        double rot2 = (c-d)/w;
+        double rot = (rot1+rot2)/2;
+
+        double fwd1 = rot * (l/2) + a;
+        double fwd2 = -rot * (l/2) + b;
+        double tfwd = (fwd1 + fwd2)/2;
+
+        double str1 = rot * (w/2) + c;
+        double str2 = -rot * (w/2) + d;
+        double tstr = (str1 + str2)/2;
+
+        //field centric
+        double fwd = tfwd * Math.cos(Math.toRadians(gyroAngle)) + tstr * Math.sin(Math.toRadians(gyroAngle));
+        double str = tstr * Math.cos(Math.toRadians(gyroAngle)) - tfwd * Math.sin(Math.toRadians(gyroAngle));
+        SmartDashboard.putNumber("a odom", a);
+        SmartDashboard.putNumber("b odom", b);
+        SmartDashboard.putNumber("c odom", c);
+        SmartDashboard.putNumber("d odom", d);
+        SmartDashboard.putNumber("FWD", fwd);
+        SmartDashboard.putNumber("STR", str);
+        SmartDashboard.putNumber("ROT", rot);
+        double[] values = {fwd, str, rot};
+        return values;
+
     }
 
     //chooses either turning in place or turning while driving
@@ -65,7 +126,11 @@ public class SwerveDriveController {
         double a = str - (rot * (l / r));
 		double b = str + (rot * (l / r));
 		double c = fwd - (rot * (w / r));
-		double d = fwd + (rot * (w / r));
+		double d = fwd + (rot * (w / r));   
+        SmartDashboard.putNumber("a kine", a);
+        SmartDashboard.putNumber("b kine", b);
+        SmartDashboard.putNumber("c kine", c);
+        SmartDashboard.putNumber("d kine", d);
 
 		double ws1 = Math.sqrt((b * b) + (c * c));//top right
 		double ws2 = Math.sqrt((b * b) + (d * d));//top left
