@@ -41,7 +41,7 @@ public class SwerveDriveWheel
 
     public double getVelocity() {
         double v = directionMotor.getSelectedSensorVelocity();
-        v *= SwerveConstants.SWERVE_POSITION_RATIO*100;
+        v *= SwerveConstants.SWERVE_POSITION_RATIO*10;
         return v; //meters per second
     }
 

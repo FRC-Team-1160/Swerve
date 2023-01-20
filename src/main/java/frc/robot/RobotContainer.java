@@ -1,10 +1,17 @@
 package frc.robot;
 
+import com.pathplanner.lib.PathConstraints;
+import com.pathplanner.lib.PathPlanner;
+import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.commands.PPSwerveControllerCommand;
+
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -14,6 +21,7 @@ import frc.robot.commands.Reset;
 import frc.robot.commands.SwerveDrive;
 import frc.robot.commands.TestRotator;
 import frc.robot.commands.ToggleGate;
+import frc.robot.commands.followPath;
 import frc.robot.subsystems.DriveTrain.DriveTrain;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
@@ -79,6 +87,31 @@ public class RobotContainer {
 
     }
 
+/*
+ * COMMANDS
+ */
+  public Command followTrajectoryCommand(PathPlannerTrajectory traj, boolean isFirstPath, PathConstraints maxSpd) {
+    return new SequentialCommandGroup(
+        new InstantCommand(() -> {
+          // Reset odometry for the first path you run during auto
+          if(isFirstPath){
+              m_driveTrain.resetOdometry(traj.getInitialHolonomicPose());
+          }
+        }),
+        new followPath(
+            traj, 
+            m_driveTrain.m_pose, // Pose supplier
+            new PIDController(0.2, 0.01, 0),
+            new PIDController(0.2, 0.01, 0),
+            new PIDController(0.2, 0.01, 0),
+            maxSpd,
+            true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
+            m_driveTrain // Requires this drive subsystem
+        )
+    );
+  }
+
+
     /**
      * Use this to pass the autonomous command to the main {@link Robot} class.
      *
@@ -87,6 +120,9 @@ public class RobotContainer {
 
     
     public Command getAutonomousCommand() {
+        /*PathConstraints max = new PathConstraints(4, 3);
+        PathPlannerTrajectory path = PathPlanner.loadPath("1.5m square", max);
+        return followTrajectoryCommand(path, true, max);*/
         return null;
     }
     

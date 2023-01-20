@@ -125,6 +125,10 @@ public class DriveTrain extends SubsystemBase{
     m_pose = new Pose2d(0,0,m_gyro.getRotation2d());
   }
 
+  public void resetOdometry(Pose2d pose) {
+    m_pose = pose;
+  }
+
   public void turnBackRight(double speed) {
     m_backRightRotationMotor.set(TalonFXControlMode.PercentOutput, speed);
   }
@@ -185,7 +189,7 @@ public class DriveTrain extends SubsystemBase{
     SmartDashboard.putNumber("Pose2DX", m_controller.m_pose.getX());
     SmartDashboard.putNumber("Pose2DRotation", m_controller.m_pose.getRotation().getDegrees());
     SmartDashboard.putNumber("Gyro Rotation2D", m_gyro.getRotation2d().getDegrees());*/
-    SmartDashboard.putNumber("FR wheel pos", m_frontRightWheel.getPosition());
+    SmartDashboard.putNumber("FR wheel vel", m_frontRightWheel.getVelocity());
   }
 
   
