@@ -60,7 +60,7 @@ public class SwerveDrive extends CommandBase {
       spd = 0.0001;
     }
     
-    m_drive.m_controller.setSwerveDrive(spd*y, spd*x, turnspd*turn, gyroAngle);
+    m_drive.m_controller.setSwerveDrive(true, spd*y, spd*x, turnspd*turn, gyroAngle);
 
   }
 

@@ -69,22 +69,13 @@ public class followPath extends CommandBase {
     SmartDashboard.putNumber("desired y", desiredState.poseMeters.getY());
 
     ChassisSpeeds targetChassisSpeeds = this.controller.calculate(pose, desiredState);
-    double fwd = targetChassisSpeeds.vyMetersPerSecond/(SwerveConstants.MAX_SPEED);
-    double str = targetChassisSpeeds.vxMetersPerSecond/(SwerveConstants.MAX_SPEED);
-    double rot = targetChassisSpeeds.omegaRadiansPerSecond/(SwerveConstants.MAX_SPEED);
-    if (Math.abs(fwd) > 1) {
-      fwd = Math.signum(fwd);
-    }
-    if (Math.abs(str) > 1) {
-      str = Math.signum(str);
-    } 
-    if (Math.abs(rot) > 1) {
-      rot = Math.signum(rot);
-    }
+    double fwd = targetChassisSpeeds.vxMetersPerSecond;
+    double str = -targetChassisSpeeds.vyMetersPerSecond;
+    double rot = targetChassisSpeeds.omegaRadiansPerSecond;
     SmartDashboard.putNumber("auto fwd", fwd);
     SmartDashboard.putNumber("auto str", str);
     SmartDashboard.putNumber("auto rot", rot);
-    m_drive.m_controller.setSwerveDrive(fwd, str, rot, m_drive.getGyroAngle());
+    m_drive.m_controller.setSwerveDrive(false, fwd, str, rot, m_drive.getGyroAngle());
   }
 
   // Called once the command ends or is interrupted.
@@ -92,7 +83,7 @@ public class followPath extends CommandBase {
   public void end(boolean interrupted) {
     this.timer.stop();
     if (interrupted) {
-      m_drive.m_controller.setSwerveDrive(0,0,0,m_drive.getGyroAngle());
+      m_drive.m_controller.setSwerveDrive(false, 0,0,0,m_drive.getGyroAngle());
     }
   }
 

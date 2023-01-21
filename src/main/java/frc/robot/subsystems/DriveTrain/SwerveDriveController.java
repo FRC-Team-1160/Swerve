@@ -1,17 +1,10 @@
 package frc.robot.subsystems.DriveTrain;
 
-import org.ejml.dense.row.mult.SubmatrixOps_FDRM;
-
 import com.kauailabs.navx.frc.AHRS;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.SwerveConstants;
 
@@ -53,16 +46,6 @@ public class SwerveDriveController {
         m_kinematics = new SwerveDriveKinematics(
                 m_frontLeftLocation, m_frontRightLocation, m_backLeftLocation, m_backRightLocation
         );
-
-
-        /*m_odometry = new SwerveDriveOdometry(
-            m_kinematics, m_gyro.getRotation2d(),
-            new SwerveModulePosition[] {
-                this.frontLeftWheel.getModule(),
-                this.frontRightWheel.getModule(),
-                this.backLeftWheel.getModule(),
-                this.backRightWheel.getModule()
-            }, new Pose2d(0.0, 0.0, new Rotation2d()));*/
     }
 
     public double[] getSwerveOdometry(double gyroAngle) {
@@ -114,13 +97,13 @@ public class SwerveDriveController {
         SmartDashboard.putNumber("FWD", fwd);
         SmartDashboard.putNumber("STR", str);
         SmartDashboard.putNumber("ROT", rot);
-        double[] values = {fwd, str, rot};
+        double[] values = {fwd, -str, rot};
         return values;
 
     }
 
     //chooses either turning in place or turning while driving
-    public void setSwerveDrive(double fwd, double str, double rot, double gyroAngle) {
+    public void setSwerveDrive(boolean isJoystick, double fwd, double str, double rot, double gyroAngle) {
 
         double l = frc.robot.Constants.SwerveConstants.l;
         double r = frc.robot.Constants.SwerveConstants.r;
@@ -143,128 +126,52 @@ public class SwerveDriveController {
 		double wa2 = (Math.atan2(b, d) * 180 / Math.PI);// + gyroAngle;
 		double wa3 = (Math.atan2(a, d) * 180 / Math.PI);// + gyroAngle;
 		double wa4 = (Math.atan2(a, c) * 180 / Math.PI);// + gyroAngle;
-
-		double max = ws1;
-		max = Math.max(max, ws2);
-		max = Math.max(max, ws3);
-		max = Math.max(max, ws4);
-		if (max > 1) {
-			ws1 /= max;
-			ws2 /= max;
-			ws3 /= max;
-			ws4 /= max;
-		}
-        frontRightWheel.set(angleToLoc(wa1), ws1);
-        frontLeftWheel.set(angleToLoc(wa2), ws2);
-        backLeftWheel.set(angleToLoc(wa3), ws3);
-        backRightWheel.set(angleToLoc(wa4), ws4);
-        //this.driveTurn(driveDirection, driveSpeed, turnSpeed);
-        /*if ((driveSpeed <= 0.02) && (Math.abs(turnSpeed) != 0.0)) {
-            //turns without driving if no drive speed
-            this.turn(turnSpeed);
+        if (isJoystick)
+        {
+		    double max = ws1;
+            max = Math.max(max, ws2);
+            max = Math.max(max, ws3);
+            max = Math.max(max, ws4);
+            if (max > 1) {
+                ws1 /= max;
+                ws2 /= max;
+                ws3 /= max;
+                ws4 /= max;
+            }
+            frontRightWheel.setOutput(angleToLoc(wa1), ws1);
+            frontLeftWheel.setOutput(angleToLoc(wa2), ws2);
+            backLeftWheel.setOutput(angleToLoc(wa3), ws3);
+            backRightWheel.setOutput(angleToLoc(wa4), ws4);
         } else {
-            //either only drives if turnspeed is 0
-            //or drives and turns at the same time if turnspeed is not 0
-            this.driveTurn(driveDirection, driveSpeed, turnSpeed);
-
+            
+            frontRightWheel.setVelocity(angleToLoc(wa1), ws1);
+            frontLeftWheel.setVelocity(angleToLoc(wa2), ws2);
+            backLeftWheel.setVelocity(angleToLoc(wa3), ws3);
+            backRightWheel.setVelocity(angleToLoc(wa4), ws4);
         }
-        */
+        SmartDashboard.putNumber("FR expected angle", angleToLoc(wa1));
+        SmartDashboard.putNumber("FL expected angle", angleToLoc(wa2));
+        SmartDashboard.putNumber("BL expected angle", angleToLoc(wa3));
+        SmartDashboard.putNumber("BR expected angle", angleToLoc(wa4));
+        SmartDashboard.putNumber("FR actual angle", frontRightWheel.getRotation());
+        SmartDashboard.putNumber("FL actual angle", frontLeftWheel.getRotation());
+        SmartDashboard.putNumber("BL actual angle", backLeftWheel.getRotation());
+        SmartDashboard.putNumber("BR actual angle", backRightWheel.getRotation());
+        SmartDashboard.putNumber("FR expected speed", ws1);
+        SmartDashboard.putNumber("FL expected speed", ws2);
+        SmartDashboard.putNumber("BL expected speed", ws3);
+        SmartDashboard.putNumber("BR expected speed", ws4);
+        SmartDashboard.putNumber("FR actual speed", frontRightWheel.getVelocity());
+        SmartDashboard.putNumber("FL actual speed", frontLeftWheel.getVelocity());
+        SmartDashboard.putNumber("BL actual speed", backLeftWheel.getVelocity());
+        SmartDashboard.putNumber("BR actual speed", backRightWheel.getVelocity());
+        SmartDashboard.putNumber("FR speed difference", Math.abs(frontRightWheel.getVelocity())- Math.abs(ws1));
 
         
     }
 
-    //DRIVE WITHOUT TURNING
-    //we don't really actually need this but its good to have
-    /*public void drive(double direction, double speed) {
-        frontLeftWheel.set(direction, speed);
-        frontRightWheel.set(direction, speed);
-        backLeftWheel.set(direction, speed);
-        backRightWheel.set(direction, speed);
-    }
-
-    //TURN WITHOUT DRIVING
-    public void turn(double speed) {
-        //zero is facing forward
-        speed *= 0.3;
-        frontLeftWheel.set(45.0, speed);
-        frontRightWheel.set(135.0, speed);
-        backLeftWheel.set(315.0, speed);
-        backRightWheel.set(225.0, speed);
-
-    }
-
-    //TURN AND DRIVE AT THE SAME TIME
-    public void driveTurn(double driveDirection, double driveSpeed, double turnSpeed) {
-        //turn Speed is value fron -1.0 to 1.0 with -1 being max left and 1 being max right
-        double turnAngle = turnSpeed * 45.0;
-        //while turning, can turn a maximum of 40 degrees
-        driveSpeed *= (Math.log(Math.abs(turnSpeed)+1)/Math.log(3))*0.45 + 1;
-        SmartDashboard.putNumber("turn Angle", turnAngle);
-        //determine if wheel is in front or in back
-        //for example: if the direction was to the right and the robot was facing forward,
-        //the frontRight and backRight wheel would be front and the frontLeft and backLeft wheels would be in back
-        //if driving direction is within 90 degrees of the direction of the wheel, wheel is in front
-
-        //FRONT LEFT
-        //directly at the front left wheel is 45 degrees
-        if (closestAngle(driveDirection, 315.0) <= 90) {
-            //front
-            //tilt to the right
-            frontLeftWheel.set(driveDirection + turnAngle, driveSpeed);
-        } else {
-            //back
-            //tilt to the left
-            frontLeftWheel.set(driveDirection - turnAngle, driveSpeed);
-        }
-        //FRONT RIGHT
-        //directly at the front right wheel is 315 degrees
-        if (closestAngle(driveDirection, 45.0) < 90) {
-            //front
-            //tilt right
-            frontRightWheel.set(driveDirection + turnAngle, driveSpeed);
-        } else {
-            //back
-            //tilt left
-            frontRightWheel.set(driveDirection - turnAngle, driveSpeed);
-        }
-
-        //BACK LEFT
-        //directly at back left wheel is 135 degrees
-        if (closestAngle(driveDirection, 225.0) < 90) {
-            //front
-            //tilt right
-            backLeftWheel.set(driveDirection + turnAngle, driveSpeed);
-        } else {
-            //back
-            //tilt left
-            backLeftWheel.set(driveDirection - turnAngle, driveSpeed);
-        }
-
-        //BACK RIGHT
-        //directly at back right wheel is 225 degrees
-        SmartDashboard.putNumber("BR closest angle", closestAngle(driveDirection, 135.0));
-        if (closestAngle(driveDirection, 135.0) <= 90) {
-
-            //front
-            //tilt right
-            backRightWheel.set(driveDirection + turnAngle, driveSpeed);
-        } else {
-            //back
-            //tilt left
-            backRightWheel.set(driveDirection - turnAngle, driveSpeed);
-        }
-    }*/
-
-    private static double closestAngle(double a, double b)
-    {
-        if (Math.abs(a - b) <= 180) {
-            return Math.abs(a-b);
-        } else {
-            if (a > b) {
-                return Math.abs((a-360)-b);
-            } else {
-                return Math.abs((a+360)-b);
-            }
-        }
+    public double testFrontRightWheel(double spd) {
+        frontRightWheel.setOutputSpeed(spd);
+        return frontRightWheel.getVelocity();
     }
 }

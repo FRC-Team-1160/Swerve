@@ -73,7 +73,7 @@ public class DriveTrain extends SubsystemBase{
 
   public Pose2d m_pose;
 
-  double wkP, wkI, wkD;
+  double wkrP, wkrI, wkrD, wksP, wksI, wksD;
 //
 
   //initializes the drive train
@@ -85,19 +85,22 @@ public class DriveTrain extends SubsystemBase{
     return m_instance;
   }
 
-  public DriveTrain() {
+  private DriveTrain() {
 
     //swerve wheel PID values
-    wkP = 0.005;
-    wkI = 0.000001;
-    wkD = 0;
+    wkrP = 0.007;
+    wkrI = 0.0005;
+    wkrD = 0;
+    wksP = 0.001;
+    wksI = 0.00001;
+    wksD = 0;
 
     //swerve modules
 
-    m_frontLeftWheel = initSwerveModule(wkP, wkI, wkD, PortConstants.FRONT_LEFT_DIRECTION_DRIVE, PortConstants.FRONT_LEFT_ROTATION_DRIVE, PortConstants.FRONT_LEFT_CODER_DRIVE);
-    m_frontRightWheel = initSwerveModule(wkP, wkI, wkD, PortConstants.FRONT_RIGHT_DIRECTION_DRIVE, PortConstants.FRONT_RIGHT_ROTATION_DRIVE, PortConstants.FRONT_RIGHT_CODER_DRIVE);
-    m_backLeftWheel = initSwerveModule(wkP, wkI, wkD, PortConstants.BACK_LEFT_DIRECTION_DRIVE, PortConstants.BACK_LEFT_ROTATION_DRIVE, PortConstants.BACK_LEFT_CODER_DRIVE);
-    m_backRightWheel = initSwerveModule(wkP, wkI, wkD, PortConstants.BACK_RIGHT_DIRECTION_DRIVE, PortConstants.BACK_RIGHT_ROTATION_DRIVE, PortConstants.BACK_RIGHT_CODER_DRIVE);
+    m_frontLeftWheel = initSwerveModule(wkrP, wkrI, wkrD, wksP, wksI, wksD, PortConstants.FRONT_LEFT_DIRECTION_DRIVE, PortConstants.FRONT_LEFT_ROTATION_DRIVE, PortConstants.FRONT_LEFT_CODER_DRIVE);
+    m_frontRightWheel = initSwerveModule(wkrP, wkrI, wkrD, wksP, wksI, wksD, PortConstants.FRONT_RIGHT_DIRECTION_DRIVE, PortConstants.FRONT_RIGHT_ROTATION_DRIVE, PortConstants.FRONT_RIGHT_CODER_DRIVE);
+    m_backLeftWheel = initSwerveModule(wkrP, wkrI, wkrD, wksP, wksI, wksD, PortConstants.BACK_LEFT_DIRECTION_DRIVE, PortConstants.BACK_LEFT_ROTATION_DRIVE, PortConstants.BACK_LEFT_CODER_DRIVE);
+    m_backRightWheel = initSwerveModule(wkrP, wkrI, wkrD, wksP, wksI, wksD, PortConstants.BACK_RIGHT_DIRECTION_DRIVE, PortConstants.BACK_RIGHT_ROTATION_DRIVE, PortConstants.BACK_RIGHT_CODER_DRIVE);
 
     m_gyro = new AHRS(Port.kMXP);
     
@@ -144,8 +147,8 @@ public class DriveTrain extends SubsystemBase{
   @Override
   public void periodic() {
     double xAngle = m_mainStick.getRawAxis(0);
-    double yAngle = -m_mainStick.getRawAxis(1);
-    double angle = Math.toDegrees(Math.atan((yAngle/xAngle)/2)) + 90;
+    double yAngle = m_mainStick.getRawAxis(1);
+    double angle = Math.toDegrees(Math.atan(yAngle/xAngle)) + 90;
     if (xAngle < 0) {
       angle += 180;
     }
@@ -169,7 +172,7 @@ public class DriveTrain extends SubsystemBase{
     double fwd = odom[0];
     double str = odom[1];
     double rot = odom[2];
-    Translation2d translation = new Translation2d(str*SwerveConstants.PERIODIC_SPEED, fwd*SwerveConstants.PERIODIC_SPEED);
+    Translation2d translation = new Translation2d(fwd*SwerveConstants.PERIODIC_SPEED, str*SwerveConstants.PERIODIC_SPEED);
     Transform2d transform = new Transform2d(translation, Rotation2d.fromDegrees(rot));
     m_pose = m_pose.plus(transform);
 
@@ -194,10 +197,10 @@ public class DriveTrain extends SubsystemBase{
 
   
 
-  private static SwerveDriveWheel initSwerveModule(double P, double I, double D, int direction_drive, int rotation_drive, int coder_drive ) {
+  private static SwerveDriveWheel initSwerveModule(double rP, double rI, double rD, double sP, double sI, double sD, int direction_drive, int rotation_drive, int coder_drive ) {
     TalonFX directionMotor = new TalonFX(direction_drive);
     TalonFX rotationMotor = new TalonFX(rotation_drive);
     CANCoder coder = new CANCoder(coder_drive);
-    return new SwerveDriveWheel(P, I, D, rotationMotor, coder, directionMotor);
+    return new SwerveDriveWheel(rP, rI, rD, sP, sI, sD, rotationMotor, coder, directionMotor);
   }
 }

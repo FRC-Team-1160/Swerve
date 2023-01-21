@@ -20,6 +20,7 @@ import frc.robot.Constants.OIConstants;
 import frc.robot.commands.Reset;
 import frc.robot.commands.SwerveDrive;
 import frc.robot.commands.TestRotator;
+import frc.robot.commands.TestWheelSpeed;
 import frc.robot.commands.ToggleGate;
 import frc.robot.commands.followPath;
 import frc.robot.subsystems.DriveTrain.DriveTrain;
@@ -80,6 +81,9 @@ public class RobotContainer {
       Trigger startButton = new JoystickButton(m_mainStick, Button.kStart.value);
       startButton.onTrue(new Reset(m_driveTrain));
 
+      /*Trigger aTrigger = new JoystickButton(m_mainStick, Button.kA.value);
+      aTrigger.toggleOnTrue(new TestWheelSpeed(m_driveTrain));*/
+
       /*ew JoystickButton(m_mainStick, Button.kX.value)
         .whenPressed(
           new ToggleGate(m_driveTrain)
@@ -101,9 +105,9 @@ public class RobotContainer {
         new followPath(
             traj, 
             m_driveTrain.m_pose, // Pose supplier
-            new PIDController(0.2, 0.01, 0),
-            new PIDController(0.2, 0.01, 0),
-            new PIDController(0.2, 0.01, 0),
+            new PIDController(0.0001, 0.000001, 0),
+            new PIDController(0.0001, 0.000001, 0),
+            new PIDController(0.0001, 0.000001, 0),
             maxSpd,
             true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
             m_driveTrain // Requires this drive subsystem
@@ -120,10 +124,10 @@ public class RobotContainer {
 
     
     public Command getAutonomousCommand() {
-        /*PathConstraints max = new PathConstraints(4, 3);
-        PathPlannerTrajectory path = PathPlanner.loadPath("1.5m square", max);
-        return followTrajectoryCommand(path, true, max);*/
-        return null;
+        PathConstraints max = new PathConstraints(4, 3);
+        PathPlannerTrajectory path = PathPlanner.loadPath("diamond curve", max);
+        return followTrajectoryCommand(path, true, max);
+        //return null;
     }
     
 }

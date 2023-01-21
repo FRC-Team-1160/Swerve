@@ -18,21 +18,26 @@ public class SwerveDriveWheel
     public TalonFX rotationMotor;
     public TalonFX directionMotor;
     public CANCoder rotationSensor;
-    double kFF, kP, kI, kD, accumulator, maxA;
+    public double lastSetpointSpeed;
+    double krP, krI, krD, ksP, ksI, ksD, rAccumulator, maxA;
 
-    public SwerveDriveWheel(double P, double I, double D, TalonFX rotationMotor, CANCoder rotationSensor, TalonFX directionMotor)
+    public SwerveDriveWheel(double rP, double rI, double rD, double sP, double sI, double sD, TalonFX rotationMotor, CANCoder rotationSensor, TalonFX directionMotor)
     {
         this.rotationSensor = rotationSensor;
         this.rotationMotor = rotationMotor;
         this.directionMotor = directionMotor;
+        this.lastSetpointSpeed = 0;
         
         //this.directionController = new PIDController(P, I, D);
-        kP = P;
-        kI = I;
-        kD = D;
+        krP = rP;
+        krI = rI;
+        krD = rD;
+        ksP = sP;
+        ksI = sI;
+        ksD = sD;
+
         maxA = 100;
-        accumulator = 0;
-        kFF = 0.05;
+        rAccumulator = 0;
     }
 
     public SwerveModulePosition getModule() {
@@ -60,7 +65,7 @@ public class SwerveDriveWheel
         directionMotor.setSelectedSensorPosition(0);
     }
 
-    public void set(double setpoint, double speed)
+    public void setOutput(double setpoint, double speed)
     {
         //choose the fastest rotation direction and wheel direction
         double currentAngle = rotationSensor.getAbsolutePosition();
@@ -77,141 +82,89 @@ public class SwerveDriveWheel
         } else if (accumulator < -maxA) {
             accumulator = -maxA;
         }*/
-        //increase output at low errors and decrease output at high errors
-
-        //double output = (kP * error);// + (kI * accumulator);// + ((0.4/(1+3*(Math.pow(Math.E, -0.01))))-0.06);
-        //double output = directionController.calculate(currentAngle, setpointAngle);
-        //int mode = closestAngle(setpoint, currentAngle);
-        /*
-        0-3 do not cross 0 degree mark
-        0 = right forward
-        1 = right back
-        2 = left forward
-        3 = left back
-        4-7 do cross 0 degree mark
-        4 = right forward
-        5 = right back
-        6 = left forward
-        7 = left back
-        */
         double angle = (((setpoint - currentAngle) % 360) + 360 ) % 360;
         double error, output;
-        
-        double setpointAngle = (setpoint % 360) - (currentAngle % 360); //the %360 for some of these really should not do anything, as setpoint and current_angle are always positive.
-        double setpointFAngle = ((setpoint+180)%360) - (currentAngle % 360);
-
-
-        if (Math.abs(setpointAngle) > 180) {
-            setpointAngle = -(Math.signum(setpointAngle) * 360.0) + setpointAngle;
+        error = getAngleError(currentAngle, setpoint);
+        if (error < 20) {
+            rAccumulator += error;
         }
-
-        if (Math.abs(setpointFAngle) > 180) {
-            setpointFAngle = -(Math.signum(setpointFAngle) * 360.0) + setpointFAngle;
+        if (rAccumulator > maxA) {
+            rAccumulator = maxA;
+        } else if (rAccumulator < -maxA) {
+            rAccumulator = -maxA;
         }
-        error = Math.abs(Math.min(setpointAngle, setpointFAngle));
-        if (error > 90) {
-            error = 180 - error;
-        }
-        output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
+        output = (krP * error) + (krI*rAccumulator);
         if (angle % 180 > 90) {
             output = -output;
         }
         if (angle < 90 || angle > 270) {
             speed = -speed;
         }
-        /*
-        if (mode == 0) {
-            error = Math.abs(setpoint - currentAngle) % 360;
-            output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
-            output = Math.abs(output);
-            speed = -speed;
-        } else if (mode == 1) {
-            error = Math.abs((setpoint + 180) - currentAngle) % 360;
-            output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
-            output = Math.abs(output);
-            speed = speed;
-        } else if (mode == 2) {
-            error = Math.abs(setpoint - currentAngle) % 360;
-            output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
-            output = -(Math.abs(output));
-            speed = -speed;
-        } else if (mode == 3) {
-            error = Math.abs((setpoint - 180) - currentAngle) % 360;
-            output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
-            speed = (speed);
-            output = -(Math.abs(output));
-        } else if (mode == 4) {
-            error = Math.abs((setpoint + 360) - currentAngle) % 360;
-            output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
-            output = Math.abs(output);
-            speed = -speed;
-        } else if (mode == 5) {
-            error = Math.abs((setpoint + 180) - currentAngle) % 360;
-            output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
-            output = Math.abs(output);
-            speed = (speed);
-        } else if (mode == 6) {
-            error = Math.abs((setpoint - 360) - currentAngle) % 360;
-            output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
-            output = -(Math.abs(output));
-            speed = -speed;
-        } else if (mode == 7) {
-            error = Math.abs((setpoint - 180) - currentAngle) % 360;
-            output = (kP * error) + ((0.4/(1+3*(Math.pow(Math.E, -0.01*error))))-0.06);
-            output = -Math.abs(output);
-            speed = speed;
-        } else {
-            error = Math.abs(setpoint - currentAngle) % 360;
-            output = (kP * error);
-            output = Math.abs(output);
-            speed = speed;
-        }*/
-        //output *= closestAngle(setpoint, currentAngle);
-        SmartDashboard.putNumber("output", output);
-        SmartDashboard.putNumber("speeed", speed);
-        //SmartDashboard.putNumber("mode", mode);
         rotationMotor.set(TalonFXControlMode.PercentOutput, output);
         directionMotor.set(TalonFXControlMode.PercentOutput, speed);
-        SmartDashboard.putNumber("error", error);
-        SmartDashboard.putNumber("setpoint", setpoint);
-        
     }
 
+    public void setOutputSpeed(double spd) {
+        rotationMotor.set(TalonFXControlMode.PercentOutput, 0);
+        directionMotor.set(TalonFXControlMode.PercentOutput, spd);
+    }
 
-    //returns true for turning right and false for turning left
-    /*private static int closestAngle(double a, double b) {
-        //a is setpoint, b is current Angle
-
-        if (Math.abs(a - b) <= 180 && a >= b) {
-            //turn right
-            if (Math.abs(a - b) <= 90) {
-                return 0;
-            } else {
-                return 3;
-            }
-        } else if (Math.abs(a - b) <= 180 && a < b) {
-            //turn left
-            if (Math.abs(a - b) <= 90) {
-                return 2;
-            } else {
-                return 1;
-            }
-            //crossing over 0
-        } else if (b >= a) {
-            //turn right
-            if (Math.abs(a+180-b) > 90) {
-                return 4;
-            } else {
-                return 7;
-            }
-
-        } else {
-            if (Math.abs(a-180-b) > 90) {
-                return 6;
-            } else {
-                return 5;
-            }
+    public void setVelocity(double setpointAngle, double setpointSpeed) {
+        
+        double currentAngle = rotationSensor.getAbsolutePosition();
+        double angle = (((setpointAngle - currentAngle) % 360) + 360 ) % 360;
+        double error = getAngleError(currentAngle, setpointAngle);
+        if (error < 20) {
+            rAccumulator += error;
         }
-    }*/
+        if (rAccumulator > maxA) {
+            rAccumulator = maxA;
+        } else if (rAccumulator < -maxA) {
+            rAccumulator = -maxA;
+        }
+        double anglePID = (krP * error) + (krI*rAccumulator);
+        double speedPID = (ksP * getSpeedError(getVelocity(), setpointSpeed));
+
+        double kV = 1/(SwerveConstants.MAX_WHEEL_SPEED);
+        double kA = 1/(SwerveConstants.MAX_WHEEL_ACCELERATION);
+
+        double setpointAcceleration = (setpointSpeed-lastSetpointSpeed)/0.02;
+
+        double angleOutput = anglePID;
+        double speedOutput = (speedPID/SwerveConstants.MAX_WHEEL_SPEED + kV*setpointSpeed + kA*setpointAcceleration);
+
+        if (angle % 180 > 90) {
+            angleOutput = -angleOutput;
+        }
+        if (angle < 90 || angle > 270) {
+            speedOutput = -speedOutput;
+        }
+
+        rotationMotor.set(TalonFXControlMode.PercentOutput, angleOutput);
+        directionMotor.set(TalonFXControlMode.PercentOutput, speedOutput);
+        lastSetpointSpeed = setpointSpeed;
+
+    }
+
+    public double getAngleError(double currentAngle, double setpoint) {
+        double setpointAngle = (setpoint % 360) - (currentAngle % 360); //the %360 for some of these really should not do anything, as setpoint and current_angle are always positive.
+        double setpointFAngle = ((setpoint+180)%360) - (currentAngle % 360);
+
+        if (Math.abs(setpointAngle) > 180) {
+            setpointAngle = -(Math.signum(setpointAngle) * 360.0) + setpointAngle;
+        }
+        if (Math.abs(setpointFAngle) > 180) {
+            setpointFAngle = -(Math.signum(setpointFAngle) * 360.0) + setpointFAngle;
+        }
+        double error = Math.abs(Math.min(setpointAngle, setpointFAngle));
+        if (error > 90) {
+            error = 180 - error;
+        }
+        return error;
+    }
+
+    public double getSpeedError(double currentSpeed, double setpointSpeed) {
+        return Math.abs(Math.abs(currentSpeed) - Math.abs(setpointSpeed));
+    }
     
 }
