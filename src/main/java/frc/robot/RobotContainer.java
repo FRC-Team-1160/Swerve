@@ -125,7 +125,7 @@ public class RobotContainer {
     
     public Command getAutonomousCommand() {
         PathConstraints max = new PathConstraints(4, 3);
-        PathPlannerTrajectory path = PathPlanner.loadPath("diamond curve", max);
+        PathPlannerTrajectory path = PathPlanner.loadPath("inplace rotate", max);
         return followTrajectoryCommand(path, true, max);
         //return null;
     }

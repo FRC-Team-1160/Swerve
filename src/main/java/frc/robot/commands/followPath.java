@@ -72,6 +72,8 @@ public class followPath extends CommandBase {
     double fwd = targetChassisSpeeds.vxMetersPerSecond;
     double str = -targetChassisSpeeds.vyMetersPerSecond;
     double rot = targetChassisSpeeds.omegaRadiansPerSecond;
+    //rot /= 2;
+    //rot *= SwerveConstants.r;
     SmartDashboard.putNumber("auto fwd", fwd);
     SmartDashboard.putNumber("auto str", str);
     SmartDashboard.putNumber("auto rot", rot);

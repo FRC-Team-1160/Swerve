@@ -16,7 +16,7 @@ public class TestWheelSpeed extends CommandBase {
   public TestWheelSpeed(DriveTrain m_drive) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.max = 0;
-    this.lastSpeed = 0;
+    this.lastSpeed = m_drive.getGyroAngle();
     this.m_drive = m_drive;
   }
 
@@ -29,13 +29,24 @@ public class TestWheelSpeed extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    SmartDashboard.putNumber("Front Right max", max);
-    double speed = m_drive.m_controller.testFrontRightWheel(0.95);
-    double accel = (speed-lastSpeed)/0.02;
+    SmartDashboard.putNumber("Gyro max", max);
+    double diff = m_drive.getGyroAngle()-lastSpeed;
+    double accel;
+    if (Math.abs(diff) < 180) {
+      accel = (diff)/0.02;
+    } else {
+      if (diff > 0) {
+        diff -= 360;
+      } else {
+        diff += 360;
+      }
+      accel = (diff)/0.02;
+    }
+    
     if (accel > max) {
       max = accel;
     }
-    lastSpeed = speed;
+    lastSpeed = m_drive.getGyroAngle();
   }
 
   // Called once the command ends or is interrupted.
