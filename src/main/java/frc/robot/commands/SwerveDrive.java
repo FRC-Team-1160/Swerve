@@ -40,6 +40,7 @@ public class SwerveDrive extends CommandBase {
     
     double joystickX = m_mainStick.getRawAxis(0);
     double joystickY = -m_mainStick.getRawAxis(1);
+    double joystickBrake = m_mainStick.getRawAxis(2);
 
     double mag = Math.sqrt(joystickX*joystickX + joystickY*joystickY);
     if (mag > 1) {
@@ -61,6 +62,7 @@ public class SwerveDrive extends CommandBase {
     }
     
     m_drive.m_controller.setSwerveDrive(true, spd*y, spd*x, turnspd*turn, gyroAngle);
+    m_drive.m_controller.brake(joystickBrake);
 
   }
 

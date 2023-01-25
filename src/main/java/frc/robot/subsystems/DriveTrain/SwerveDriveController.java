@@ -170,6 +170,13 @@ public class SwerveDriveController {
         
     }
 
+    public void brake(double power) {
+        frontLeftWheel.brake(power);
+        frontRightWheel.brake(power);
+        backLeftWheel.brake(power);
+        backRightWheel.brake(power);
+    }
+
     public double testFrontRightWheel(double spd) {
         frontRightWheel.setOutputSpeed(spd);
         return frontRightWheel.getVelocity();

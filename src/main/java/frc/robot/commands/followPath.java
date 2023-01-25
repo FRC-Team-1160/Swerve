@@ -78,6 +78,11 @@ public class followPath extends CommandBase {
     SmartDashboard.putNumber("auto str", str);
     SmartDashboard.putNumber("auto rot", rot);
     m_drive.m_controller.setSwerveDrive(false, fwd, str, rot, m_drive.getGyroAngle());
+    if (fwd == 0 && str == 0) {
+      m_drive.m_controller.brake(0.5);
+    } else {
+      m_drive.m_controller.brake(0);
+    }
   }
 
   // Called once the command ends or is interrupted.

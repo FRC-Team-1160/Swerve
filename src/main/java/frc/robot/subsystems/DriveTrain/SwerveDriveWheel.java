@@ -20,6 +20,8 @@ public class SwerveDriveWheel
     public CANCoder rotationSensor;
     public double lastSetpointSpeed;
     double krP, krI, krD, ksP, ksI, ksD, rAccumulator, maxA;
+    double currentOutputSpeed;
+    double brakeConstant;
 
     public SwerveDriveWheel(double rP, double rI, double rD, double sP, double sI, double sD, TalonFX rotationMotor, CANCoder rotationSensor, TalonFX directionMotor)
     {
@@ -27,6 +29,8 @@ public class SwerveDriveWheel
         this.rotationMotor = rotationMotor;
         this.directionMotor = directionMotor;
         this.lastSetpointSpeed = 0;
+        this.currentOutputSpeed = 0;
+        this.brakeConstant = 1;
         
         //this.directionController = new PIDController(P, I, D);
         krP = rP;
@@ -100,13 +104,15 @@ public class SwerveDriveWheel
         if (angle < 90 || angle > 270) {
             speed = -speed;
         }
+        this.currentOutputSpeed = speed;
         rotationMotor.set(TalonFXControlMode.PercentOutput, output);
-        directionMotor.set(TalonFXControlMode.PercentOutput, speed);
+        directionMotor.set(TalonFXControlMode.PercentOutput, speed * this.brakeConstant);
     }
 
     public void setOutputSpeed(double spd) {
         rotationMotor.set(TalonFXControlMode.PercentOutput, 0);
-        directionMotor.set(TalonFXControlMode.PercentOutput, spd);
+        directionMotor.set(TalonFXControlMode.PercentOutput, spd * this.brakeConstant);
+        this.currentOutputSpeed = spd;
     }
 
     public void setVelocity(double setpointAngle, double setpointSpeed) {
@@ -139,11 +145,15 @@ public class SwerveDriveWheel
         if (angle < 90 || angle > 270) {
             speedOutput = -speedOutput;
         }
-
+        this.currentOutputSpeed = speedOutput;
         rotationMotor.set(TalonFXControlMode.PercentOutput, angleOutput);
-        directionMotor.set(TalonFXControlMode.PercentOutput, speedOutput);
+        directionMotor.set(TalonFXControlMode.PercentOutput, speedOutput*this.brakeConstant);
         lastSetpointSpeed = setpointSpeed;
 
+    }
+
+    public void brake(double power) {
+        this.brakeConstant = (2.25*(Math.pow((4/9), power))-1.25); //exponential decay
     }
 
     public double getAngleError(double currentAngle, double setpoint) {
