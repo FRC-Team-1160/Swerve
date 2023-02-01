@@ -34,11 +34,32 @@ public final class Constants {
   }
 
   public static final class SwerveConstants{
-    public static final double l = 24.25;
-    public static final double w = 24.25;
+    public static final double l = 0.61595;
+    public static final double w = 0.61595;
     public static final double r = Math.sqrt(Math.pow(l, 2) + Math.pow(w, 2));
     public static final double centerToMotor = 0;//Distance from center of motor to center of robot
     public static final double unitsToRotations = (2048/360);
+    //To Be Changed
+    public static final double ksVolts = 0.22;
+    public static final double kvVoltSecondsPerMeter = 1.98;
+    public static final double kvVoltsSecondsSquaredPerMeter = 0.2;
+    public static final double kPDriveVel = 8.5;
+    public static final double kMaxSpeedMetersPerSecond = 3;
+    public static final double kMaxAccelerationMeterPerSecondSquared = 1;
+    public static final double kSwerveB = 2;
+    public static final double kSwerveZeta = 0.7;
+    public static final double WHEEL_CIRCUMFERENCE = 0.2865;
+    public static final double SWERVE_POSITION_RATIO = WHEEL_CIRCUMFERENCE/13824; //units to meters
+    public static final double PERIODIC_SPEED = 0.02;
+
+    public static final double WEIGHT = 35;
+
+    //THESE TWO VALUES BECOME LESS WITH MORE WEIGHT
+    public static final double MAX_WHEEL_SPEED = 4.5; //in m/s, with no weight, it is 4.7
+    public static final double MAX_WHEEL_ACCELERATION = 35; //in m/s^2, with no weight it is 45
+
+
+    public static final double MS_TO_UPMS = (13824/28.4); //meters per second to units per 100ms
   }
 
   public static final class OIConstants {

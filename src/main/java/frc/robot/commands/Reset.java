@@ -11,10 +11,10 @@ import frc.robot.subsystems.DriveTrain.DriveTrain;
 
 import frc.robot.Constants.OIConstants;
 
-public class ResetGyro extends CommandBase {
+public class Reset extends CommandBase {
   /** Creates a new SwerveDrive. */
   DriveTrain m_drive;
-  public ResetGyro(DriveTrain m_drive) {
+  public Reset(DriveTrain m_drive) {
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(m_drive);
     this.m_drive = m_drive;
@@ -24,6 +24,8 @@ public class ResetGyro extends CommandBase {
   @Override
   public void initialize() {
       m_drive.resetGyro();
+      m_drive.resetWheelPositions();
+      m_drive.resetPose();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
